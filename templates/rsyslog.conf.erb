@@ -1,0 +1,103 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+#rsyslog v3 config file
+
+# if you experience problems, check
+# http://www.rsyslog.com/troubleshoot for assistance
+
+#### MODULES ####
+
+$ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)
+$ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
+#$ModLoad immark.so	# provides --MARK-- message capability
+
+<% if @is_log_server == 'true' -%>
+<% if @my_enable_udp_server == 'true' -%>
+# Provides UDP syslog reception
+$ModLoad imudp.so
+<% end -%>
+<% if @my_enable_tcp_server == 'true' -%>
+# Provides TCP syslog reception
+$ModLoad imtcp.so
+<% end -%>
+# log every source in its own directory
+$template RemoteHost, "<%= @log_dir %>/%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log"
+<% end -%>
+
+#### GLOBAL DIRECTIVES ####
+
+# Use default timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# File syncing capability is disabled by default. This feature is usually not required,
+# not useful and an extreme performance hit
+#$ActionFileEnableSync on
+
+
+#### RULES ####
+
+# Local Logging
+$RuleSet local
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+kern.*                                                  <%= @kernel_target %>
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+*.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+# use the local RuleSet as default if not specified otherwise
+$DefaultRuleset local
+
+<% if @remote_logging == 'true' -%>
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+$WorkDirectory <%= @spool_dir %> # where to place spool files
+$ActionQueueFileName queue # unique name prefix for spool files
+$ActionQueueMaxDiskSpace <%= @max_spool_size %> # 1gb space limit (use as much as possible)
+$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+$ActionQueueType LinkedList   # run asynchronously
+$ActionResumeRetryCount -1    # infinite retries if host is down
+*.* <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= @log_server -%>:<%= @log_server_port %>
+<% end -%>
+
+<% if @is_log_server == 'true' -%>
+# logging from remote
+$RuleSet remote
+*.* ?RemoteHost
+
+### Listeners
+<% if @my_enable_tcp_server == 'true' -%>
+# bind ruleset to tcp listener
+$InputTCPServerBindRuleset remote
+# activate it
+$InputTCPServerRun 514
+<% end -%>
+<% if @my_enable_udp_server == 'true' -%>
+# bind ruleset to udp listener
+$InputUDPServerBindRuleset remote
+# activate it
+$UDPServerRun 514
+<% end -%>
+<% end -%>
