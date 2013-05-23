@@ -1,4 +1,4 @@
-# ## rsyslog module ##
+# ## Class: rsyslog ##
 #
 # Module to manage rsyslog. Handles both local and remote logging.
 #
