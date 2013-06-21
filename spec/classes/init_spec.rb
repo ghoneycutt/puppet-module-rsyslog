@@ -27,6 +27,15 @@ require 'spec_helper'
         })
       }
 
+      it {
+        should contain_file('rsyslog_sysconfig').with({
+          'path'   => '/etc/sysconfig/rsyslog',
+          'owner'  => 'root',
+          'group'  => 'root',
+          'mode'   => '0644',
+        })
+      }
+
     end
 
     describe 'RHEL 5 should include rsyslog class with default params' do
@@ -48,6 +57,15 @@ require 'spec_helper'
       it {
         should contain_file('rsyslog_config').with({
           'path'   => '/etc/rsyslog.conf',
+          'owner'  => 'root',
+          'group'  => 'root',
+          'mode'   => '0644',
+        })
+      }
+
+      it {
+        should contain_file('rsyslog_sysconfig').with({
+          'path'   => '/etc/sysconfig/rsyslog',
           'owner'  => 'root',
           'group'  => 'root',
           'mode'   => '0644',
