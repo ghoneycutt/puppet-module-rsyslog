@@ -3,6 +3,10 @@
 
 [![Build Status](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog.png)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
 
+[![Build Status](
+https://api.travis-ci.org/ghoneycutt/puppet-module-rsyslog.png?branch=master)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
+
+
 Module to manage rsyslog. Handles both local and remote logging.
 
 Inspired by [saz/rsyslog](https://github.com/saz/puppet-rsyslog/)
