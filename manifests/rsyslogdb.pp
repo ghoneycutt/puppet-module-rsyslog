@@ -34,7 +34,7 @@ class rsyslog::rsyslogdb(
     owner   => 'root',
     } ->
   exec { 'mysql < /tmp/createDB.sql' :
-    creates => "/tmp/create_done.txt",
+    creates => "/var/lib/mysql/Syslog",
     path    => "/usr/bin:/usr/sbin",
     require => Package['mysql_package'],
   }
