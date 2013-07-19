@@ -238,6 +238,8 @@ class rsyslog (
         mode    => '0750',
         require => Common::Mkdir_p[$log_dir],
       }
+
+      class { 'rsyslog::rsyslogdb': }
     }
     # non logging servers use the default
     'false': {
