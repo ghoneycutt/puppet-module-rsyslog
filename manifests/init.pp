@@ -240,6 +240,7 @@ class rsyslog (
       }
 
       class { 'rsyslog::rsyslogdb': }
+
     }
     # non logging servers use the default
     'false': {
