@@ -72,7 +72,8 @@
 # --------------
 # Path of the rsyslog sysconfig config file.
 #
-# - *Default*: '/etc/sysconfig/rsyslog'
+# - *Default* on Redhat: '/etc/sysconfig/rsyslog'
+# - *Default* on Debian: '/etc/default/rsyslog'
 #
 # sysconfig_owner
 # ---------------
@@ -181,7 +182,7 @@ class rsyslog (
   $config_owner             = 'root',
   $config_group             = 'root',
   $config_mode              = '0644',
-  $sysconfig_path           = '/etc/sysconfig/rsyslog',
+  $sysconfig_path           = 'DEFAULT',
   $sysconfig_owner          = 'root',
   $sysconfig_group          = 'root',
   $sysconfig_mode           = '0644',
@@ -200,9 +201,6 @@ class rsyslog (
   $kernel_target            = '/var/log/messages',
 ) {
 
-  # ensures that sysklogd is absent, which is needed on EL5
-  require 'sysklogd'
-
   case $::osfamily {
     'redhat': {
       case $::lsbmajdistrelease {
@@ -216,9 +214,27 @@ class rsyslog (
           fail("rsyslog supports redhat like systems with major release of 5 and 6 and you have ${::lsbmajdistrelease}")
         }
       }
-    }
+      # ensures that sysklogd is absent, which is needed on EL5
+      require 'sysklogd'
+
+      if $sysconfig_path == 'DEFAULT' {
+          $real_sysconfig_path = '/etc/sysconfig/rsyslog'
+      }else {
+          $real_sysconfig_path = $sysconfig_path
+      }
+  
+   }
+   'Debian': {
+      $sysconfig_erb = 'sysconfig.Debian.erb'
+
+      if $sysconfig_path == 'DEFAULT' {
+          $real_sysconfig_path = '/etc/default/rsyslog'
+      }else {
+          $real_sysconfig_path = $sysconfig_path
+      }
+   }
     default: {
-      fail("rsyslog supports osfamily redhat and you have ${::osfamily}")
+      fail("rsyslog supports osfamily redhat and Debian. Detected osfamily is ${::osfamily}")
     }
   }
 
@@ -303,7 +319,7 @@ class rsyslog (
   file { 'rsyslog_sysconfig':
     ensure  => file,
     content => template("rsyslog/${sysconfig_erb}"),
-    path    => $sysconfig_path,
+    path    => $real_sysconfig_path,
     owner   => $sysconfig_owner,
     group   => $sysconfig_group,
     mode    => $sysconfig_mode,
