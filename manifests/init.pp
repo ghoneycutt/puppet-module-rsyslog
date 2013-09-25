@@ -229,7 +229,7 @@ class rsyslog (
    'Debian': {
    }
     default: {
-      fail("rsyslog supports osfamily redhat and you have ${::osfamily}")
+      fail("rsyslog supports osfamily redhat and Debian. Detected osfamily is ${::osfamily}")
     }
   }
 
