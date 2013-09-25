@@ -189,6 +189,7 @@ class rsyslog (
   $daemon_ensure            = 'running',
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
+  $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $default_remote_logging   = 'false',
   $spool_dir                = '/var/spool/rsyslog',
   $max_spool_size           = '1g',
