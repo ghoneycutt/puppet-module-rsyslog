@@ -73,7 +73,7 @@ describe 'rsyslog' do
         end
         it {
             should contain_file('rsyslog_config') \
-            .with_content(/^\$template RemoteHost, "foo\/bar\/%HOSTNAME%\/\.log"$/)
+            .with_content(/^\$template RemoteHost, "\/foo\/bar\/%HOSTNAME%.log"$/)
             }
         end
      end
