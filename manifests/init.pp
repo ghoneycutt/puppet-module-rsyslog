@@ -227,12 +227,6 @@ class rsyslog (
     # logging servers do not log elsewhere
     'true': {
       $remote_logging = 'false'
-      # Make sure that we have a slash between the directory and the template to complete the path
-      if $log_dir !~ /\/$/ and $remote_template !~ /^\// {
-        $remote_template_string = "/${remote_template}"
-      }else{
-        $remote_template_string = $remote_template
-      }
 
       include common
 
