@@ -63,20 +63,20 @@ describe 'rsyslog' do
             .with_content(/^\$UDPServerRun 514$/)
         }
       end
-    end
-    context 'with log_dir and remote_template set' do
-     let :params do
-       {
-         :log_dir => 'foo/bar',
-         :remote_template => '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
-       }
+        context 'with log_dir and remote_template set' do
+        let :params do
+        {
+            :is_log_server => 'true',
+            :log_dir => '/foo/bar',
+            :remote_template => '%HOSTNAME%.log',
+        }
+        end
+        it {
+            should contain_file('rsyslog_config') \
+            .with_content(/^\$template RemoteHost, "foo\/bar\/%HOSTNAME%\/\.log"$/)
+            }
+        end
      end
-     it {
-         should contain_file('rsyslog_config') \
-         .with_content(/^\$template RemoteHost, "foo\/bar\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%\.log"$/)
-         }
-      end
-    end
  end
 
   describe 'rsyslog_package' do
