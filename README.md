@@ -127,6 +127,12 @@ Path to store logs, if $is_log_server is true.
 
 - *Default*: '/srv/logs'
 
+remote_template
+---------------
+Template path to store logs from remote hosts, appended after log_dir
+
+- *Default*: '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log'
+
 default_remote_logging
 ----------------------
 Wheter to send logs remotely to a centralized logging service.
