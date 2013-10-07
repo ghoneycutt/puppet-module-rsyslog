@@ -256,7 +256,7 @@ describe 'rsyslog' do
       it do
         expect {
           should include_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and Debian, you have Suse./)
+        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and Debian. Detected osfamily is Suse/)
       end
     end
   end
