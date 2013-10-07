@@ -218,7 +218,9 @@ class rsyslog (
       require 'sysklogd'
 
       if $sysconfig_path == 'DEFAULT' {
-          $sysconfig_path = '/etc/sysconfig/rsyslog'
+          $real_sysconfig_path = '/etc/sysconfig/rsyslog'
+      }else {
+          $real_sysconfig_path = $sysconfig_path
       }
   
    }
@@ -226,7 +228,9 @@ class rsyslog (
       $sysconfig_erb = 'sysconfig.Debian.erb'
 
       if $sysconfig_path == 'DEFAULT' {
-          $sysconfig_path = '/etc/default/rsyslog'
+          $real_sysconfig_path = '/etc/default/rsyslog'
+      }else {
+          $real_sysconfig_path = $sysconfig_path
       }
    }
     default: {
@@ -315,7 +319,7 @@ class rsyslog (
   file { 'rsyslog_sysconfig':
     ensure  => file,
     content => template("rsyslog/${sysconfig_erb}"),
-    path    => $sysconfig_path,
+    path    => $real_sysconfig_path,
     owner   => $sysconfig_owner,
     group   => $sysconfig_group,
     mode    => $sysconfig_mode,
