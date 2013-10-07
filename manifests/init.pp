@@ -72,7 +72,8 @@
 # --------------
 # Path of the rsyslog sysconfig config file.
 #
-# - *Default*: '/etc/sysconfig/rsyslog'
+# - *Default* on Redhat: '/etc/sysconfig/rsyslog'
+# - *Default* on Debian: '/etc/default/rsyslog'
 #
 # sysconfig_owner
 # ---------------
@@ -181,7 +182,7 @@ class rsyslog (
   $config_owner             = 'root',
   $config_group             = 'root',
   $config_mode              = '0644',
-  $sysconfig_path           = '/etc/sysconfig/rsyslog',
+  $sysconfig_path           = 'DEFAULT',
   $sysconfig_owner          = 'root',
   $sysconfig_group          = 'root',
   $sysconfig_mode           = '0644',
@@ -215,18 +216,18 @@ class rsyslog (
       }
       # ensures that sysklogd is absent, which is needed on EL5
       require 'sysklogd'
-      file { 'rsyslog_sysconfig':
-        ensure  => file,
-        content => template("rsyslog/${sysconfig_erb}"),
-        path    => $sysconfig_path,
-        owner   => $sysconfig_owner,
-        group   => $sysconfig_group,
-        mode    => $sysconfig_mode,
-        require => Package['rsyslog_package'],
-        notify  => Service['rsyslog_daemon'],
-      }  
+
+      if $sysconfig_path == 'DEFAULT' {
+          $sysconfig_path = '/etc/sysconfig/rsyslog'
+      }
+  
    }
    'Debian': {
+      $sysconfig_erb = 'sysconfig.Debian.erb'
+
+      if $sysconfig_path == 'DEFAULT' {
+          $sysconfig_path = '/etc/default/rsyslog'
+      }
    }
     default: {
       fail("rsyslog supports osfamily redhat and Debian. Detected osfamily is ${::osfamily}")
@@ -311,7 +312,16 @@ class rsyslog (
     notify  => Service['rsyslog_daemon'],
   }
 
-
+  file { 'rsyslog_sysconfig':
+    ensure  => file,
+    content => template("rsyslog/${sysconfig_erb}"),
+    path    => $sysconfig_path,
+    owner   => $sysconfig_owner,
+    group   => $sysconfig_group,
+    mode    => $sysconfig_mode,
+    require => Package['rsyslog_package'],
+    notify  => Service['rsyslog_daemon'],
+  }
 
   service { 'rsyslog_daemon':
     ensure     => $daemon_ensure,
