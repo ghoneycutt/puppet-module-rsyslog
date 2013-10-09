@@ -90,7 +90,8 @@ sysconfig_path
 --------------
 Path of the rsyslog sysconfig config file.
 
-- *Default*: '/etc/sysconfig/rsyslog'
+- *Default*: '/etc/sysconfig/rsyslog' # EL
+- *Default*: '/etc/default/rsyslog'   # Debian
 
 sysconfig_owner
 ---------------
