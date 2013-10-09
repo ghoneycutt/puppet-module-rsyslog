@@ -22,7 +22,7 @@ $ModLoad imudp.so
 $ModLoad imtcp.so
 <% end -%>
 # log every source in its own directory
-$template RemoteHost, "<%= @log_dir %>/%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log"
+$template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 <% end -%>
 
 #### GLOBAL DIRECTIVES ####
