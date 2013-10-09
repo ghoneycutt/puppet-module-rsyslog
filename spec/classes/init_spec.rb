@@ -23,7 +23,7 @@ describe 'rsyslog' do
         }
       end
     end
-    context 'content' do
+    context 'rsyslog config content' do
       context 'with default params' do
         it {
           should contain_file('rsyslog_config') \
@@ -144,7 +144,29 @@ describe 'rsyslog' do
   end
 
   describe 'rsyslog_sysconfig' do
-    context 'on major release 6' do
+    context 'on Debian' do
+      let :facts do
+        {
+          :osfamily => 'Debian',
+        }
+      end
+      context 'with default params' do
+        it {
+          should contain_file('rsyslog_sysconfig').with({
+            'path'    => '/etc/default/rsyslog',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'mode'    => '0644',
+            'require' => 'Package[rsyslog_package]',
+            'notify'  => 'Service[rsyslog_daemon]',
+          })
+        }
+        it {
+          should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c5"$/)
+        }
+      end
+    end
+    context 'on EL 6' do
       let :facts do
         {
           :osfamily => 'RedHat',
@@ -167,7 +189,7 @@ describe 'rsyslog' do
         }
       end
     end
-    context 'on major release 5' do
+    context 'on EL 5' do
       let :facts do
         {
           :osfamily => 'RedHat',
@@ -256,12 +278,20 @@ describe 'rsyslog' do
         it { should include_class('rsyslog') }
       end
     end
-    context 'on unsupported osfamily, debian' do
-      let(:facts) { { :osfamily => 'debian' } }
+    context 'on supported osfamily, Debian' do
+        let :facts do
+            {
+                :osfamily         => 'Debian',
+            }
+        end
+        it { should include_class('rsyslog') }
+    end
+    context 'on unsupported osfamily, Suse' do
+      let(:facts) { { :osfamily => 'Suse' } }
       it do
         expect {
           should include_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and you have debian./)
+        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and Debian. Detected osfamily is Suse/)
       end
     end
   end
