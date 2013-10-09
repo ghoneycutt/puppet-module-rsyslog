@@ -224,8 +224,8 @@ class rsyslog (
         $real_sysconfig_path = $sysconfig_path
       }
 
-   }
-   'Debian': {
+    }
+    'Debian': {
       $sysconfig_erb = 'sysconfig.debian.erb'
 
       if $sysconfig_path == 'USE_DEFAULTS' {
@@ -233,7 +233,7 @@ class rsyslog (
       } else {
         $real_sysconfig_path = $sysconfig_path
       }
-   }
+    }
     default: {
       fail("rsyslog supports osfamily redhat and Debian. Detected osfamily is ${::osfamily}")
     }
