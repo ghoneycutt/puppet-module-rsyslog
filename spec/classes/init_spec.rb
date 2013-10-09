@@ -256,12 +256,20 @@ describe 'rsyslog' do
         it { should include_class('rsyslog') }
       end
     end
-    context 'on unsupported osfamily, debian' do
-      let(:facts) { { :osfamily => 'debian' } }
+    context 'on supported osfamily, Debian' do
+        let :facts do
+            {
+                :osfamily         => 'Debian',
+            }
+        end
+        it { should include_class('rsyslog') }
+    end
+    context 'on unsupported osfamily, Suse' do
+      let(:facts) { { :osfamily => 'Suse' } }
       it do
         expect {
           should include_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and you have debian./)
+        }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and Debian. Detected osfamily is Suse/)
       end
     end
   end
