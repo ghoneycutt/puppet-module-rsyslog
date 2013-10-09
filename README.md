@@ -1,4 +1,7 @@
 # rsyslog module #
+===
+
+[![Build Status](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog.png)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
 
 [![Build Status](
 https://api.travis-ci.org/ghoneycutt/puppet-module-rsyslog.png?branch=master)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
@@ -10,12 +13,16 @@ Inspired by [saz/rsyslog](https://github.com/saz/puppet-rsyslog/)
 
 This module will ensure that sysklogd is absent, which is needed on EL5.
 
+===
+
 # Compatability #
 
 This module has been tested to work on the following systems.
 
  * EL 5
  * EL 6
+
+===
 
 # Parameters #
 
