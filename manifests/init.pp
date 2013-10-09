@@ -182,7 +182,7 @@ class rsyslog (
   $config_owner             = 'root',
   $config_group             = 'root',
   $config_mode              = '0644',
-  $sysconfig_path           = 'DEFAULT',
+  $sysconfig_path           = 'USE_DEFAULTS',
   $sysconfig_owner          = 'root',
   $sysconfig_group          = 'root',
   $sysconfig_mode           = '0644',
@@ -217,20 +217,20 @@ class rsyslog (
       # ensures that sysklogd is absent, which is needed on EL5
       require 'sysklogd'
 
-      if $sysconfig_path == 'DEFAULT' {
-          $real_sysconfig_path = '/etc/sysconfig/rsyslog'
-      }else {
-          $real_sysconfig_path = $sysconfig_path
+      if $sysconfig_path == 'USE_DEFAULTS' {
+        $real_sysconfig_path = '/etc/sysconfig/rsyslog'
+      } else {
+        $real_sysconfig_path = $sysconfig_path
       }
-  
+
    }
    'Debian': {
-      $sysconfig_erb = 'sysconfig.Debian.erb'
+      $sysconfig_erb = 'sysconfig.debian.erb'
 
-      if $sysconfig_path == 'DEFAULT' {
-          $real_sysconfig_path = '/etc/default/rsyslog'
-      }else {
-          $real_sysconfig_path = $sysconfig_path
+      if $sysconfig_path == 'USE_DEFAULTS' {
+        $real_sysconfig_path = '/etc/default/rsyslog'
+      } else {
+        $real_sysconfig_path = $sysconfig_path
       }
    }
     default: {
