@@ -6,171 +6,6 @@
 #
 # This module will ensure that sysklogd is absent, which is needed on EL5.
 #
-# ### Parameters ###
-#
-# package
-# -------
-# Name of the rsyslog package.
-#
-# - *Default*: 'rsyslog'
-#
-# package_ensure
-# --------------
-# What state the package should be in. Valid values are 'present', 'absent', 'purged', 'held' and 'latest'.
-#
-# - *Default*: 'present'
-#
-# logrotate_d_config_path
-# -----------------------
-# Path of the logrotate config file.
-#
-# - *Default*: '/etc/logrotate.d/syslog'
-#
-# logrotate_d_config_owner
-# ------------------------
-# Owner of the logrotate config file.
-#
-# - *Default*: 'root'
-#
-# logrotate_d_config_group
-# ------------------------
-# Group of the logrotate config file.
-#
-# - *Default*: 'root'
-#
-# logrotate_d_config_mode
-# -----------------------
-# Mode of the logrotate config file.
-#
-# - *Default*: '0644'
-#
-# config_path
-# -----------
-# Path of the rsyslog config file.
-#
-# - *Default*: '/etc/rsyslog.conf'
-#
-# config_owner
-# ------------
-# Owner of the rsyslog config file.
-#
-# - *Default*: 'root'
-#
-# config_group
-# ------------
-# Group of the rsyslog config file.
-#
-# - *Default*: 'root'
-#
-# config_mode
-# -----------
-# Mode of the rsyslog config file.
-#
-# - *Default*: '0644'
-#
-# sysconfig_path
-# --------------
-# Path of the rsyslog sysconfig config file.
-#
-# - *Default* on Redhat: '/etc/sysconfig/rsyslog'
-# - *Default* on Debian: '/etc/default/rsyslog'
-#
-# sysconfig_owner
-# ---------------
-# Owner of the rsyslog sysconfig config file.
-#
-# - *Default*: 'root'
-#
-# sysconfig_group
-# ---------------
-# Group of the rsyslog sysconfig config file.
-#
-# - *Default*: 'root'
-#
-# sysconfig_mode
-# --------------
-# Mode of the rsyslog sysconfig config file.
-#
-# - *Default*: '0644'
-#
-# daemon
-# ------
-# Name of the rsyslog service.
-#
-# - *Default*: 'rsyslog'
-#
-# daemon_ensure
-# -------------
-# Whether a service should be running. Valid values are 'stopped' and 'running'.
-#
-# - *Default*: 'running'
-#
-# is_log_server
-# -------------
-# Whether the system syslog service is meant to recieve messages from remote hosts. Valid values are 'true' and 'false'.
-#
-# - *Default*: 'false'
-#
-# log_dir
-# -------
-# Path to store logs, if $is_log_server is true.
-#
-# - *Default*: '/srv/logs'
-#
-# default_remote_logging
-# ----------------------
-# Wheter to send logs remotely to a centralized logging service.
-#
-# - *Default*: 'false'
-#
-# spool_dir
-# ---------
-# Path to place spool files.
-#
-# - *Default*: '/var/spool/rsyslog'
-#
-# max_spool_size
-# --------------
-# Maximum disk space used by spool files. Uses one letter units such as k, m and g.
-#
-# - *Default*: '1g'
-#
-# transport_protocol
-# ------------------
-# Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
-#
-# - *Default*: 'tcp'
-#
-# log_server
-# ----------
-# Server to send logs to if $default_remote_logging is 'true'.
-#
-# - *Default*: "log.${::domain}"
-#
-# log_server_port
-# ---------------
-# Port of the server to send logs to if $default_remote_logging is 'true'.
-#
-# - *Default*: '514'
-#
-# enable_tcp_server
-# -----------------
-# Whether to enable tcp listening for the service. If undefined, set by $transport_protocol.
-#
-# - *Default*: undef
-#
-# enable_udp_server
-# -----------------
-# Whether to enable udp listening for the service. If undefined, set by $transport_protocol.
-#
-# - *Default*: undef
-#
-# kernel_target
-# -------------
-# Target of kernel logs.
-#
-# - *Default*: '/var/log/messages'
-#
 class rsyslog (
   $package                  = 'rsyslog',
   $package_ensure           = 'present',
@@ -191,7 +26,7 @@ class rsyslog (
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
-  $default_remote_logging   = 'false',
+  $remote_logging           = 'false',
   $spool_dir                = '/var/spool/rsyslog',
   $max_spool_size           = '1g',
   $transport_protocol       = 'tcp',
@@ -200,7 +35,13 @@ class rsyslog (
   $enable_tcp_server        = undef,
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
+  $source_facilities        = '*.*',
 ) {
+
+  # validation
+  if $source_facilities == '' {
+    fail("rsyslog::source_facilities cannot be empty!")
+  }
 
   case $::osfamily {
     'redhat': {
@@ -242,7 +83,7 @@ class rsyslog (
   case $is_log_server {
     # logging servers do not log elsewhere
     'true': {
-      $remote_logging = 'false'
+      $remote_logging_real = 'false'
 
       include common
 
@@ -258,7 +99,7 @@ class rsyslog (
     }
     # non logging servers use the default
     'false': {
-      $remote_logging = $default_remote_logging
+      $remote_logging_real = $remote_logging
     }
     default: {
       fail("rsyslog::is_log_server must is ${is_log_server} and must be \'true\' or \'false\'.")

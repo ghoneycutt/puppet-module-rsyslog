@@ -70,7 +70,7 @@ local7.*                                                /var/log/boot.log
 # use the local RuleSet as default if not specified otherwise
 $DefaultRuleset local
 
-<% if @remote_logging == 'true' -%>
+<% if @remote_logging_real == 'true' -%>
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
 $WorkDirectory <%= @spool_dir %> # where to place spool files
@@ -79,7 +79,7 @@ $ActionQueueMaxDiskSpace <%= @max_spool_size %> # 1gb space limit (use as much a
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
-*.* <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= @log_server -%>:<%= @log_server_port %>
+<%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= @log_server -%>:<%= @log_server_port %>
 <% end -%>
 
 <% if @is_log_server == 'true' -%>

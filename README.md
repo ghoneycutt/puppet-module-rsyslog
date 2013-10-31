@@ -1,8 +1,6 @@
 # rsyslog module #
 ===
 
-[![Build Status](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog.png)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
-
 [![Build Status](
 https://api.travis-ci.org/ghoneycutt/puppet-module-rsyslog.png?branch=master)](https://travis-ci.org/ghoneycutt/puppet-module-rsyslog)
 
@@ -54,7 +52,7 @@ logrotate_d_config_group
 ------------------------
 Group of the logrotate config file.
 
-- *Default*: 'root' 
+- *Default*: 'root'
 
 logrotate_d_config_mode
 -----------------------
@@ -125,7 +123,7 @@ Whether a service should be running. Valid values are 'stopped' and 'running'.
 
 is_log_server
 -------------
-Whether the system syslog service is meant to recieve messages from remote hosts. Valid values are 'true' and 'false'. 
+Whether the system syslog service is meant to recieve messages from remote hosts. Valid values are 'true' and 'false'.
 
 - *Default*: 'false'
 
@@ -141,7 +139,7 @@ Template path to store logs from remote hosts, appended after log_dir
 
 - *Default*: '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log'
 
-default_remote_logging
+remote_logging
 ----------------------
 Wheter to send logs remotely to a centralized logging service.
 
@@ -167,13 +165,13 @@ Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
 
 log_server
 ----------
-Server to send logs to if $default_remote_logging is 'true'.
+Server to send logs to if remote_logging is true.
 
 - *Default*: "log.${::domain}"
 
 log_server_port
 ---------------
-Port of the server to send logs to if $default_remote_logging is 'true'.
+Port of the server to send logs to if remote_logging is true.
 
 - *Default*: '514'
 
@@ -194,3 +192,9 @@ kernel_target
 Target of kernel logs.
 
 - *Default*: '/var/log/messages'
+
+source_facilities
+-----------------
+List of source facilities to be sent to remote log server. Only used if remote_logging is true.
+
+- *Default*: `*.*`
