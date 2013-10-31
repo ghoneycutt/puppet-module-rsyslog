@@ -63,6 +63,42 @@ describe 'rsyslog' do
             .with_content(/^\$UDPServerRun 514$/)
         }
       end
+      context 'with is_log_server=true and source_facilities specified' do
+        let :params do
+          {
+            :is_log_server     => 'true',
+            :source_facilities => '*.*;user.none',
+          }
+        end
+        it {
+          should contain_file('rsyslog_config') \
+            .with_content(/^kern.\*\s+\/var\/log\/messages$/) \
+            .with_content(/^\$ModLoad imtcp.so$/) \
+            .with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) \
+            .with_content(/^\$RuleSet remote\n\*.\* \?RemoteHost$/) \
+            .with_content(/^\$InputTCPServerBindRuleset remote$/) \
+            .with_content(/^\$InputTCPServerRun 514$/)
+          should_not contain_file('rsyslog_config') \
+            .with_content(/^\$ModLoad imudp.so$/) \
+            .with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files\n\$ActionQueueFileName queue # unique name prefix for spool files\n\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)\n\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown\n\$ActionQueueType LinkedList   # run asynchronously\n\$ActionResumeRetryCount -1    # infinite retries if host is down$/) \
+            .with_content(/^\*.\*;user.none @@log.defaultdomain:514/) \
+            .with_content(/^\$InputUDPServerBindRuleset remote$/) \
+            .with_content(/^\$UDPServerRun 514$/)
+        }
+      end
+      context 'with is_log_server=true and source_facilities set to an empty string' do
+        let :params do
+          {
+            :is_log_server     => 'true',
+            :source_facilities => '',
+          }
+        end
+        it do
+          expect {
+            should include_class('rsyslog')
+          }.to raise_error(Puppet::Error,/rsyslog::source_facilities cannot be empty!/)
+        end
+      end
         context 'with log_dir and remote_template set' do
         let :params do
         {
