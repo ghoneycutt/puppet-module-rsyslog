@@ -26,7 +26,7 @@ class rsyslog (
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
-  $default_remote_logging   = 'false',
+  $remote_logging           = 'false',
   $spool_dir                = '/var/spool/rsyslog',
   $max_spool_size           = '1g',
   $transport_protocol       = 'tcp',
@@ -83,7 +83,7 @@ class rsyslog (
   case $is_log_server {
     # logging servers do not log elsewhere
     'true': {
-      $remote_logging = 'false'
+      $remote_logging_real = 'false'
 
       include common
 
@@ -99,7 +99,7 @@ class rsyslog (
     }
     # non logging servers use the default
     'false': {
-      $remote_logging = $default_remote_logging
+      $remote_logging_real = $remote_logging
     }
     default: {
       fail("rsyslog::is_log_server must is ${is_log_server} and must be \'true\' or \'false\'.")
