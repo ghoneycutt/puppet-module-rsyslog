@@ -17,6 +17,7 @@ This module will ensure that sysklogd is absent, which is needed on EL5.
 
 This module has been tested to work on the following systems.
 
+ * Debian 7
  * EL 5
  * EL 6
 
