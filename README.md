@@ -152,6 +152,24 @@ Path to place spool files.
 
 - *Default*: '/var/spool/rsyslog'
 
+spool_dir_owner
+---------------
+Owner of the spool directory.
+
+- *Default*: 'root'
+
+spool_dir_group
+---------------
+Group of the spool directory.
+
+- *Default*: 'root'
+
+spool_dir_mode
+--------------
+Mode of the spool directory.
+
+- *Default*: '0700'
+
 max_spool_size
 --------------
 Maximum disk space used by spool files. Uses one letter units such as k, m and g.

@@ -28,6 +28,9 @@ class rsyslog (
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
   $spool_dir                = '/var/spool/rsyslog',
+  $spool_dir_owner          = 'root',
+  $spool_dir_group          = 'root',
+  $spool_dir_mode           = '0700',
   $max_spool_size           = '1g',
   $transport_protocol       = 'tcp',
   $log_server               = "log.${::domain}",
@@ -102,7 +105,7 @@ class rsyslog (
       $remote_logging_real = $remote_logging
     }
     default: {
-      fail("rsyslog::is_log_server must is ${is_log_server} and must be \'true\' or \'false\'.")
+      fail("rsyslog::is_log_server is ${is_log_server} and must be \'true\' or \'false\'.")
     }
   }
 
@@ -172,5 +175,18 @@ class rsyslog (
   service { 'rsyslog_daemon':
     ensure     => $daemon_ensure,
     name       => $daemon,
+  }
+
+  if $remote_logging == 'true' {
+    common::mkdir_p { $spool_dir: }
+
+    file { 'ryslog_spool_directory':
+      ensure  => 'directory',
+      path    => $spool_dir,
+      owner   => $spool_dir_owner,
+      group   => $spool_dir_group,
+      mode    => $spool_dir_mode,
+      require => Common::Mkdir_p[$spool_dir],
+    }
   }
 }

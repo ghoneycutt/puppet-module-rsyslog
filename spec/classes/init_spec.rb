@@ -295,10 +295,47 @@ describe 'rsyslog' do
       it do
         expect {
           should include_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog::is_log_server must is undefined and must be \'true\' or \'false\'./)
+        }.to raise_error(Puppet::Error,/rsyslog::is_log_server is undefined and must be \'true\' or \'false\'./)
       end
     end
   end
+
+  describe 'case remote_logging, default params' do
+    let :facts do
+      {
+        :osfamily => 'RedHat',
+        :lsbmajdistrelease => '6',
+      }
+    end
+    context 'case true' do
+      let(:params) { { :remote_logging => 'true' } }
+      it {
+        should contain_file('ryslog_spool_directory').with({
+          'ensure'  => 'directory',
+          'path'    => '/var/spool/rsyslog',
+          'owner'   => 'root',
+          'group'   => 'root',
+          'mode'    => '0700',
+          'require' => 'Common::Mkdir_p[/var/spool/rsyslog]'
+        })
+      }
+      it {
+        should contain_exec('mkdir_p-/var/spool/rsyslog').with({
+          'command' => 'mkdir -p /var/spool/rsyslog',
+          'unless'  => 'test -d /var/spool/rsyslog',
+        })
+      }
+    end
+    context 'case false' do
+      let(:params) { { :remote_logging => 'false' } }
+      it {
+        should_not contain_file('ryslog_spool_directory')
+      }
+      it {
+        should_not contain_exec('mkdir_p-/var/spool/rsyslog')
+      }
+      end
+    end
 
   describe 'module platform support' do
     context 'on supported osfamily, RedHat' do
