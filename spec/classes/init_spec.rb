@@ -50,15 +50,13 @@ describe 'rsyslog' do
         let :params do
           { :is_log_server => 'true' }
         end
-        it {
-          should contain_file('rsyslog_config') \
-            .with_content(/^kern.\*\s+\/var\/log\/messages$/) \
-            .with_content(/^\$ModLoad imtcp.so$/) \
-            .with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) \
-            .with_content(/^\$RuleSet remote\n\*.\* \?RemoteHost$/) \
-            .with_content(/^\$InputTCPServerBindRuleset remote$/) \
-            .with_content(/^\$InputTCPServerRun 514$/)
-        }
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
@@ -69,6 +67,60 @@ describe 'rsyslog' do
         it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+      end
+
+      context 'with is_log_server enabled and transport_protocol=tcp specified' do
+        let :params do
+          {
+            :is_log_server      => 'true',
+            :transport_protocol => 'tcp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+      end
+
+      context 'with is_log_server enabled and transport_protocol=udp specified' do
+        let :params do
+          {
+            :is_log_server      => 'true',
+            :transport_protocol => 'udp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+      end
+
+      context 'with is_log_server enabled and enable_tcp_server enabled and enable_udp_server enabled' do
+        let :params do
+          {
+            :is_log_server     => 'true',
+            :enable_tcp_server => 'true',
+            :enable_udp_server => 'true',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
       end
 
       context 'with remote_logging enabled' do
@@ -139,43 +191,6 @@ describe 'rsyslog' do
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
       end
-
-#/!\
-      context 'with is_log_server enabled and transport_protocol=tcp specified' do
-        let :params do
-          {
-            :is_log_server      => 'true',
-            :transport_protocol => 'tcp',
-          }
-        end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
-      end
-
-      context 'with is_log_server enabled and transport_protocol=udp specified' do
-        let :params do
-          {
-            :is_log_server      => 'true',
-            :transport_protocol => 'udp',
-          }
-        end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
-      end
-
-#/!\
 
       context 'with source_facilities set to an empty string' do
         let :params do
@@ -338,10 +353,8 @@ describe 'rsyslog' do
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
-        it {
-          should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/)
-          should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/)
-        }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/) }
       end
     end
   end
