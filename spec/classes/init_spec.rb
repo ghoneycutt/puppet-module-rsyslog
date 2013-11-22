@@ -102,6 +102,81 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').with_content(/^\*.\*;user.none @@log.defaultdomain:514/) }
       end
 
+      context 'with remote_logging enabled and transport_protocol=tcp specified' do
+        let :params do
+          {
+            :remote_logging     => 'true',
+            :transport_protocol => 'tcp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+      end
+
+      context 'with remote_logging enabled and transport_protocol=udp specified' do
+        let :params do
+          {
+            :remote_logging     => 'true',
+            :transport_protocol => 'udp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* @log.defaultdomain:514$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+      end
+
+#/!\
+      context 'with is_log_server enabled and transport_protocol=tcp specified' do
+        let :params do
+          {
+            :is_log_server      => 'true',
+            :transport_protocol => 'tcp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+      end
+
+      context 'with is_log_server enabled and transport_protocol=udp specified' do
+        let :params do
+          {
+            :is_log_server      => 'true',
+            :transport_protocol => 'udp',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
+        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+      end
+
+#/!\
+
       context 'with source_facilities set to an empty string' do
         let :params do
           { :source_facilities => '' }
@@ -298,6 +373,25 @@ describe 'rsyslog' do
         }.to raise_error(Puppet::Error,/rsyslog::is_log_server is undefined and must be \'true\' or \'false\'./)
       end
     end
+  end
+
+  describe 'case transport_protocol, default params' do
+    let :facts do
+      {
+        :osfamily          => 'RedHat',
+        :lsbmajdistrelease => '6',
+      }
+    end
+
+    context 'with transport_protocol set to invalid value' do
+      let(:params) { { :transport_protocol => 'invalid' } }
+      it do
+        expect {
+          should include_class('rsyslog')
+        }.to raise_error(Puppet::Error,/rsyslog::transport_protocol is invalid and must be \'tcp\' or \'udp\'./)
+      end
+    end
+
   end
 
   describe 'case remote_logging, default params' do
