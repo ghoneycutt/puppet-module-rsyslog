@@ -21,7 +21,7 @@ class rsyslog (
   $sysconfig_owner          = 'root',
   $sysconfig_group          = 'root',
   $sysconfig_mode           = '0644',
-  $daemon                   = 'rsyslog',
+  $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
@@ -48,6 +48,8 @@ class rsyslog (
 
   case $::osfamily {
     'redhat': {
+      $default_service_name   = 'rsyslog'
+      $default_sysconfig_path = '/etc/sysconfig/rsyslog'
       case $::lsbmajdistrelease {
         '5': {
           $sysconfig_erb = 'sysconfig.rhel5.erb'
@@ -61,26 +63,37 @@ class rsyslog (
       }
       # ensures that sysklogd is absent, which is needed on EL5
       require 'sysklogd'
-
-      if $sysconfig_path == 'USE_DEFAULTS' {
-        $real_sysconfig_path = '/etc/sysconfig/rsyslog'
-      } else {
-        $real_sysconfig_path = $sysconfig_path
-      }
-
     }
     'Debian': {
-      $sysconfig_erb = 'sysconfig.debian.erb'
-
-      if $sysconfig_path == 'USE_DEFAULTS' {
-        $real_sysconfig_path = '/etc/default/rsyslog'
-      } else {
-        $real_sysconfig_path = $sysconfig_path
+      $default_service_name   = 'rsyslog'
+      $default_sysconfig_path = '/etc/default/rsyslog'
+      $sysconfig_erb          = 'sysconfig.debian.erb'
+    }
+    'Suse' : {
+      $default_service_name   = 'syslog'
+      $default_sysconfig_path = '/etc/sysconfig/syslog'
+      case $::lsbmajdistrelease {
+        '11' : {
+          $sysconfig_erb = 'sysconfig.suse11.erb'
+        }
+        default: {
+          fail( "rsyslog supports Suse like systems with major release 11, and you have ${::lsbmajdistrelease}" )
+        }
       }
     }
     default: {
-      fail("rsyslog supports osfamily redhat and Debian. Detected osfamily is ${::osfamily}")
+      fail("rsyslog supports osfamilies Redhat, Suse and Debian. Detected osfamily is ${::osfamily}")
     }
+  }
+
+  $service_name_real = $daemon ? {
+    'USE_DEFAULTS' => $default_service_name,
+    default        => $daemon
+  }
+
+  $sysconfig_path_real = $sysconfig_path ? {
+    'USE_DEFAULTS' => $default_sysconfig_path,
+    default        => $sysconfig_path
   }
 
   case $is_log_server {
@@ -164,7 +177,7 @@ class rsyslog (
   file { 'rsyslog_sysconfig':
     ensure  => file,
     content => template("rsyslog/${sysconfig_erb}"),
-    path    => $real_sysconfig_path,
+    path    => $sysconfig_path_real,
     owner   => $sysconfig_owner,
     group   => $sysconfig_group,
     mode    => $sysconfig_mode,
@@ -174,7 +187,7 @@ class rsyslog (
 
   service { 'rsyslog_daemon':
     ensure     => $daemon_ensure,
-    name       => $daemon,
+    name       => $service_name_real,
   }
 
   if $remote_logging == 'true' {
