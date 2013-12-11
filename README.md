@@ -113,8 +113,11 @@ Mode of the rsyslog sysconfig config file.
 daemon
 ------
 Name of the rsyslog service.
+'USE_DEFAULTS' will choose the service name based on the osfamily.
+'rsyslog' # RHEL, Debian
+'syslog'  # Suse
 
-- *Default*: 'rsyslog'
+- *Default*: 'USE_DEFAULTS'
 
 daemon_ensure
 -------------
