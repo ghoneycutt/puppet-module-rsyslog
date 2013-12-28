@@ -1,6 +1,6 @@
 require 'spec_helper'
-
 describe 'rsyslog' do
+
   describe 'rsyslog_config' do
     let :facts do
       {
@@ -198,7 +198,7 @@ describe 'rsyslog' do
         end
         it do
           expect {
-            should include_class('rsyslog')
+            should contain_class('rsyslog')
           }.to raise_error(Puppet::Error,/rsyslog::source_facilities cannot be empty!/)
         end
       end
@@ -369,7 +369,7 @@ describe 'rsyslog' do
 
     context 'case true' do
       let(:params) { { :is_log_server => 'true' } }
-      it { should include_class('common') }
+      it { should contain_class('common') }
 
       it {
         should contain_file('/srv/logs').with({
@@ -382,7 +382,7 @@ describe 'rsyslog' do
       let(:params) { { :is_log_server => 'undefined' } }
       it do
         expect {
-          should include_class('rsyslog')
+          should contain_class('rsyslog')
         }.to raise_error(Puppet::Error,/rsyslog::is_log_server is undefined and must be \'true\' or \'false\'./)
       end
     end
@@ -400,7 +400,7 @@ describe 'rsyslog' do
       let(:params) { { :transport_protocol => 'invalid' } }
       it do
         expect {
-          should include_class('rsyslog')
+          should contain_class('rsyslog')
         }.to raise_error(Puppet::Error,/rsyslog::transport_protocol is invalid and must be \'tcp\' or \'udp\'./)
       end
     end
@@ -455,7 +455,7 @@ describe 'rsyslog' do
         end
         it do
           expect {
-            should include_class('rsyslog')
+            should contain_class('rsyslog')
           }.to raise_error(Puppet::Error,/rsyslog supports redhat like systems with major release of 5 and 6 and you have 4/)
         end
       end
@@ -467,7 +467,7 @@ describe 'rsyslog' do
             :lsbmajdistrelease => '5',
           }
         end
-        it { should include_class('rsyslog') }
+        it { should contain_class('rsyslog') }
       end
 
       context 'on supported major release 6' do
@@ -477,7 +477,7 @@ describe 'rsyslog' do
             :lsbmajdistrelease => '6',
           }
         end
-        it { should include_class('rsyslog') }
+        it { should contain_class('rsyslog') }
       end
     end
 
@@ -485,14 +485,14 @@ describe 'rsyslog' do
         let :facts do
             { :osfamily => 'Debian' }
         end
-        it { should include_class('rsyslog') }
+        it { should contain_class('rsyslog') }
     end
 
     context 'on unsupported osfamily, Suse' do
       let(:facts) { { :osfamily => 'Suse' } }
       it do
         expect {
-          should include_class('rsyslog')
+          should contain_class('rsyslog')
         }.to raise_error(Puppet::Error,/rsyslog supports osfamily redhat and Debian. Detected osfamily is Suse/)
       end
     end
