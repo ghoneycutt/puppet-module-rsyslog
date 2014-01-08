@@ -38,6 +38,12 @@ What state the package should be in. Valid values are 'present', 'absent', 'purg
 
 - *Default*: 'present'
 
+pid_file
+--------
+Path to pid file.
+
+- *Default*: based on platform
+
 logrotate_d_config_path
 -----------------------
 Path of the logrotate config file.

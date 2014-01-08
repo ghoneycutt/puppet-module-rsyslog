@@ -9,3 +9,4 @@ project_page 'https://github.com/ghoneycutt/puppet-module-rsyslog'
 
 dependency 'ghoneycutt/sysklogd', '1.x'
 dependency 'ghoneycutt/common', '1.x'
+dependency 'puppetlabs/stdlib', '>= 3.2.0'
