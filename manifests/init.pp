@@ -106,8 +106,6 @@ class rsyslog (
   } else {
     $pid_file_real = $pid_file
   }
-
-  notify { "pid_file = <${pid_file}> :: pid_file_real = <${pid_file_real}>.": }
   validate_absolute_path($pid_file_real)
 
   case $is_log_server {
