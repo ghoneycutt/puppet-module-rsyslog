@@ -9,6 +9,7 @@
 class rsyslog (
   $package                  = 'rsyslog',
   $package_ensure           = 'present',
+  $pid_file                 = 'USE_DEFAULTS',
   $logrotate_d_config_path  = '/etc/logrotate.d/syslog',
   $logrotate_d_config_owner = 'root',
   $logrotate_d_config_group = 'root',
@@ -43,22 +44,24 @@ class rsyslog (
 
   # validation
   if $source_facilities == '' {
-    fail("rsyslog::source_facilities cannot be empty!")
+    fail('rsyslog::source_facilities cannot be empty!')
   }
 
   case $::osfamily {
-    'redhat': {
+    'RedHat': {
       $default_service_name   = 'rsyslog'
       $default_sysconfig_path = '/etc/sysconfig/rsyslog'
       case $::lsbmajdistrelease {
         '5': {
-          $sysconfig_erb = 'sysconfig.rhel5.erb'
+          $default_pid_file = '/var/run/rsyslogd.pid'
+          $sysconfig_erb    = 'sysconfig.rhel5.erb'
         }
         '6': {
-          $sysconfig_erb = 'sysconfig.rhel6.erb'
+          $default_pid_file = '/var/run/syslogd.pid'
+          $sysconfig_erb    = 'sysconfig.rhel6.erb'
         }
         default: {
-          fail("rsyslog supports redhat like systems with major release of 5 and 6 and you have ${::lsbmajdistrelease}")
+          fail("rsyslog supports RedHat like systems with major release of 5 and 6 and you have ${::lsbmajdistrelease}")
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
@@ -67,11 +70,13 @@ class rsyslog (
     'Debian': {
       $default_service_name   = 'rsyslog'
       $default_sysconfig_path = '/etc/default/rsyslog'
+      $default_pid_file       = '/var/run/rsyslogd.pid'
       $sysconfig_erb          = 'sysconfig.debian.erb'
     }
     'Suse' : {
       $default_service_name   = 'syslog'
       $default_sysconfig_path = '/etc/sysconfig/syslog'
+      $default_pid_file       = '/var/run/rsyslogd.pid'
       case $::lsbmajdistrelease {
         '11' : {
           $sysconfig_erb = 'sysconfig.suse11.erb'
@@ -82,7 +87,7 @@ class rsyslog (
       }
     }
     default: {
-      fail("rsyslog supports osfamilies Redhat, Suse and Debian. Detected osfamily is ${::osfamily}")
+      fail("rsyslog supports osfamilies RedHat, Suse and Debian. Detected osfamily is ${::osfamily}")
     }
   }
 
@@ -95,6 +100,15 @@ class rsyslog (
     'USE_DEFAULTS' => $default_sysconfig_path,
     default        => $sysconfig_path
   }
+
+  if $pid_file == 'USE_DEFAULTS' {
+    $pid_file_real = $default_pid_file
+  } else {
+    $pid_file_real = $pid_file
+  }
+
+  notify { "pid_file = <${pid_file}> :: pid_file_real = <${pid_file_real}>.": }
+  validate_absolute_path($pid_file_real)
 
   case $is_log_server {
     # logging servers do not log elsewhere
@@ -155,11 +169,11 @@ class rsyslog (
 
   file { 'rsyslog_logrotate_d_config':
     ensure  => file,
-    source  => 'puppet:///modules/rsyslog/logrotate_d_config',
     path    => $logrotate_d_config_path,
     owner   => $logrotate_d_config_owner,
     group   => $logrotate_d_config_group,
     mode    => $logrotate_d_config_mode,
+    content => template('rsyslog/logrotate.erb'),
     require => Package['rsyslog_package'],
   }
 

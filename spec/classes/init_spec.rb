@@ -265,15 +265,64 @@ describe 'rsyslog' do
     end
   end
 
-  describe 'rsyslog_logrotate_d_config' do
-    let :facts do
-      {
-        :osfamily          => 'RedHat',
-        :lsbmajdistrelease => '6',
-      }
-    end
+  logrotate_hash = {
+    'el5' => { :osfamily => 'RedHat', :release => '5', :pid => '/var/run/rsyslogd.pid' },
+    'el6' => { :osfamily => 'RedHat', :release => '6', :pid => '/var/run/syslogd.pid' },
+    'debian7' => { :osfamily => 'Debian', :release => '7', :pid => '/var/run/rsyslogd.pid' },
+    'suse11' => { :osfamily => 'Suse', :release => '11', :pid => '/var/run/rsyslogd.pid' },
+  }
 
-    context 'with default params' do
+  describe 'rsyslog_logrotate_d_config' do
+    logrotate_hash.sort.each do |k,v|
+      context "with default params on #{v[:osfamily]} #{v[:release]}" do
+        let :facts do
+          {
+            :osfamily          => v[:osfamily],
+            :lsbmajdistrelease => v[:release],
+          }
+        end
+        it {
+          should contain_file('rsyslog_logrotate_d_config').with({
+            'path'    => '/etc/logrotate.d/syslog',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'mode'    => '0644',
+            'require' => 'Package[rsyslog_package]',
+          })
+        }
+
+        it { should contain_file('rsyslog_logrotate_d_config').with_content(
+%{# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+/var/log/messages
+/var/log/secure
+/var/log/maillog
+/var/log/spooler
+/var/log/boot.log
+/var/log/cron
+{
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat #{v[:pid]} 2> /dev/null` 2> /dev/null || true
+    endscript
+}
+})
+        }
+      end
+    end
+  end
+
+  describe 'with pid_file parameter' do
+    context 'specified' do
+      let :facts do
+        {
+          :osfamily          => 'Debian',
+          :lsbmajdistrelease => '7',
+          :pid_file          => '/path/to/syslog.pid',
+        }
+      end
+
       it {
         should contain_file('rsyslog_logrotate_d_config').with({
           'path'    => '/etc/logrotate.d/syslog',
@@ -283,6 +332,41 @@ describe 'rsyslog' do
           'require' => 'Package[rsyslog_package]',
         })
       }
+
+      it { should contain_file('rsyslog_logrotate_d_config').with_content(
+%{# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+/var/log/messages
+/var/log/secure
+/var/log/maillog
+/var/log/spooler
+/var/log/boot.log
+/var/log/cron
+{
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat /path/to/syslog.pid 2> /dev/null` 2> /dev/null || true
+    endscript
+}
+})
+        }
+    end
+
+    context 'specified as an invalid value' do
+      let :facts do
+        {
+          :osfamily          => 'Debian',
+          :lsbmajdistrelease => '7',
+          :pid_file          => 'invalid/path/to/syslog.pid',
+        }
+      end
+
+      it do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error)
+      end
     end
   end
 
@@ -303,9 +387,8 @@ describe 'rsyslog' do
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
-        it {
-          should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c5"$/)
-        }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c5"$/) }
       end
     end
 
@@ -486,7 +569,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports redhat like systems with major release of 5 and 6 and you have 4/)
+          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5 and 6 and you have 4/)
         end
       end
 
@@ -549,7 +632,7 @@ describe 'rsyslog' do
       it do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog supports osfamilies Redhat, Suse and Debian. Detected osfamily is Solaris/)
+        }.to raise_error(Puppet::Error,/rsyslog supports osfamilies RedHat, Suse and Debian. Detected osfamily is Solaris/)
       end
     end
   end
