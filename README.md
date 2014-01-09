@@ -15,7 +15,7 @@ This module will ensure that sysklogd is absent, which is needed on EL5.
 
 # Compatability #
 
-This module has been tested to work on the following systems.
+This module has been tested to work on the following systems with Puppet v3.x and Ruby versions 1.8.7 and 1.9.3.
 
  * Debian 7
  * EL 5
