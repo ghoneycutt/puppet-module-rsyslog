@@ -18,7 +18,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
@@ -228,14 +228,33 @@ describe 'rsyslog' do
     end
 
     context 'with default params' do
-      it { should contain_package('rsyslog_package').with( { 'name' => 'rsyslog' } ) }
+      it {
+        should contain_package('rsyslog').with({
+          'ensure' => 'present'
+        })
+      }
+    end
+
+    context 'specified as an array' do
+      let(:params) { { :package => ['rsyslog', 'andfriends'] } }
+
+      it {
+        should contain_package('rsyslog').with({
+          'ensure' => 'present'
+        })
+      }
+
+      it {
+        should contain_package('andfriends').with({
+          'ensure' => 'present'
+        })
+      }
     end
 
     context 'with package_ensure=absent' do
       let (:params) { { :package_ensure => 'absent' } }
       it {
-        should contain_package('rsyslog_package').with({
-          'name'   => 'rsyslog',
+        should contain_package('rsyslog').with({
           'ensure' => 'absent',
         })
       }
@@ -287,7 +306,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
           })
         }
 
@@ -329,7 +348,7 @@ describe 'rsyslog' do
           'owner'   => 'root',
           'group'   => 'root',
           'mode'    => '0644',
-          'require' => 'Package[rsyslog_package]',
+          'require' => 'Package[rsyslog]',
         })
       }
 
@@ -383,7 +402,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
@@ -407,7 +426,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
@@ -432,7 +451,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
@@ -456,7 +475,7 @@ describe 'rsyslog' do
             'owner'   => 'root',
             'group'   => 'root',
             'mode'    => '0644',
-            'require' => 'Package[rsyslog_package]',
+            'require' => 'Package[rsyslog]',
             'notify'  => 'Service[rsyslog_daemon]',
           })
         }
