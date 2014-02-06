@@ -160,9 +160,8 @@ class rsyslog (
     $my_enable_udp_server = $default_enable_udp_server
   }
 
-  package { 'rsyslog_package':
+  package { $package:
     ensure => $package_ensure,
-    name   => $package,
   }
 
   file { 'rsyslog_logrotate_d_config':
@@ -172,7 +171,7 @@ class rsyslog (
     group   => $logrotate_d_config_group,
     mode    => $logrotate_d_config_mode,
     content => template('rsyslog/logrotate.erb'),
-    require => Package['rsyslog_package'],
+    require => Package[$package],
   }
 
   file { 'rsyslog_config':
@@ -182,7 +181,7 @@ class rsyslog (
     owner   => $config_owner,
     group   => $config_group,
     mode    => $config_mode,
-    require => Package['rsyslog_package'],
+    require => Package[$package],
     notify  => Service['rsyslog_daemon'],
   }
 
@@ -193,7 +192,7 @@ class rsyslog (
     owner   => $sysconfig_owner,
     group   => $sysconfig_group,
     mode    => $sysconfig_mode,
-    require => Package['rsyslog_package'],
+    require => Package[$package],
     notify  => Service['rsyslog_daemon'],
   }
 
