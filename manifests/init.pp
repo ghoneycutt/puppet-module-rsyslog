@@ -28,6 +28,11 @@ class rsyslog (
   $log_dir                  = '/srv/logs',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
+  $rsyslog_d_dir            = '/etc/rsyslog.d',
+  $rsyslog_d_dir_owner      = 'root',
+  $rsyslog_d_dir_group      = 'root',
+  $rsyslog_d_dir_mode       = '0755',
+  $rsyslog_fragments        = undef,
   $spool_dir                = '/var/spool/rsyslog',
   $spool_dir_owner          = 'root',
   $spool_dir_group          = 'root',
@@ -46,6 +51,12 @@ class rsyslog (
   if $source_facilities == '' {
     fail('rsyslog::source_facilities cannot be empty!')
   }
+
+  if $rsyslog_fragments != undef {
+    create_resources('rsyslog::fragment', $rsyslog_fragments)
+  }
+
+  validate_absolute_path($rsyslog_d_dir)
 
   case $::osfamily {
     'RedHat': {
@@ -194,6 +205,17 @@ class rsyslog (
     mode    => $sysconfig_mode,
     require => Package[$package],
     notify  => Service['rsyslog_daemon'],
+  }
+
+  common::mkdir_p { $rsyslog_d_dir: }
+
+  file { 'rsyslog_d_dir':
+    ensure  => 'directory',
+    path    => $rsyslog_d_dir,
+    owner   => $rsyslog_d_dir_owner,
+    group   => $rsyslog_d_dir_group,
+    mode    => $rsyslog_d_dir_mode,
+    require => Common::Mkdir_p[$rsyslog_d_dir],
   }
 
   service { 'rsyslog_daemon':
