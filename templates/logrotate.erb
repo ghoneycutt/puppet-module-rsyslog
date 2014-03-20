@@ -1,12 +1,9 @@
 # This file is being maintained by Puppet.
 # DO NOT EDIT
 
-/var/log/messages
-/var/log/secure
-/var/log/maillog
-/var/log/spooler
-/var/log/boot.log
-/var/log/cron
+<% @logrotate_syslog_files_real.each do |file| -%>
+<%= file %>
+<% end -%>
 {
     sharedscripts
     postrotate
