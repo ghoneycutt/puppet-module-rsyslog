@@ -26,6 +26,9 @@ class rsyslog (
   $daemon_ensure            = 'running',
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
+  $log_dir_owner            = 'root',
+  $log_dir_group            = 'root',
+  $log_dir_mode             = '0750',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
   $spool_dir                = '/var/spool/rsyslog',
@@ -119,9 +122,9 @@ class rsyslog (
 
       file { $log_dir:
         ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0750',
+        owner   => $log_dir_owner,
+        group   => $log_dir_group,
+        mode    => $log_dir_mode,
         require => Common::Mkdir_p[$log_dir],
       }
     }
