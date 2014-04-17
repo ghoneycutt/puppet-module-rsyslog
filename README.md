@@ -13,7 +13,7 @@ This module will ensure that sysklogd is absent, which is needed on EL5.
 
 ===
 
-# Compatability #
+# Compatibility #
 
 This module has been tested to work on the following systems with Puppet v3.x and Ruby versions 1.8.7, 1.9.3, and 2.0.0.
 
@@ -134,7 +134,7 @@ Whether a service should be running. Valid values are 'stopped' and 'running'.
 
 is_log_server
 -------------
-Whether the system syslog service is meant to recieve messages from remote hosts. Valid values are 'true' and 'false'.
+Whether the system syslog service is meant to receive messages from remote hosts. Valid values are 'true' and 'false'.
 
 - *Default*: 'false'
 
@@ -152,9 +152,45 @@ Template path to store logs from remote hosts, appended after log_dir
 
 remote_logging
 ----------------------
-Wheter to send logs remotely to a centralized logging service.
+Whether to send logs remotely to a centralized logging service.
 
 - *Default*: 'false'
+
+rsyslog_d_dir
+-------------
+Path to place rsyslog.d files.
+
+- *Default*: '/etc/rsyslog.d'
+
+rsyslog_d_dir_owner
+-------------------
+Owner of the rsyslog.d directory.
+
+- *Default*: 'root'
+
+rsyslog_d_dir_group
+-------------------
+Group of the rsyslog.d directory.
+
+- *Default*: 'root'
+
+rsyslog_d_dir_mode
+------------------
+Mode of the rsyslog.d directory.
+
+- *Default*: '0755'
+
+rsyslog_d_dir_purge
+-------------------
+Boolean to purge unmanaged files from rsyslog.d
+
+- *Default*: true
+
+rsyslog_fragments
+-----------------
+Hash of fragments to pass to rsyslog::fragment
+
+- *Default*: undef
 
 spool_dir
 ---------
@@ -227,3 +263,29 @@ source_facilities
 List of source facilities to be sent to remote log server. Only used if remote_logging is true.
 
 - *Default*: `*.*`
+
+===
+
+# rsyslog::fragment define #
+Places a fragment in $rsyslog_d_dir directory
+
+## Parameters for rsyslog::fragment
+
+ensure
+------
+Whether the file should exist or not. Possible values are file and absent.
+
+- *Default*: 'file'
+
+content
+-------
+String with contents of the fragment file.
+
+- *Default*: undef
+
+## Example usage
+<pre>
+rsyslog::rsyslog_fragments:
+  everything:
+    content: "*.* /tmp/everything"
+</pre>

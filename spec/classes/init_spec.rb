@@ -491,6 +491,127 @@ describe 'rsyslog' do
     end
   end
 
+  describe 'rsyslog_d_dir' do
+    context "with default params" do
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+        }
+      end
+      it {
+        should contain_file('rsyslog_d_dir').with({
+          'ensure'  => 'directory',
+          'path'    => '/etc/rsyslog.d',
+          'owner'   => 'root',
+          'group'   => 'root',
+          'mode'    => '0755',
+          'purge'   => true,
+          'recurse' => true,
+          'require' => 'Common::Mkdir_p[/etc/rsyslog.d]',
+        })
+      }
+    end
+
+    context "with rsyslog_d_dir parameters specified" do
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+        }
+      end
+      let :params do
+        { :rsyslog_d_dir       => '/custom/rsyslog.d',
+          :rsyslog_d_dir_owner => 'other',
+          :rsyslog_d_dir_group => 'othergroup',
+          :rsyslog_d_dir_mode  => '0775',
+          :rsyslog_d_dir_purge => false,
+        }
+      end
+      it {
+        should contain_file('rsyslog_d_dir').with({
+          'ensure'  => 'directory',
+          'path'    => '/custom/rsyslog.d',
+          'owner'   => 'other',
+          'group'   => 'othergroup',
+          'mode'    => '0775',
+          'recurse' => true,
+          'purge'   => false,
+          'require' => 'Common::Mkdir_p[/custom/rsyslog.d]',
+        })
+      }
+    end
+
+    context "with rsyslog_d_dir specified as invalid path" do
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+        }
+      end
+      let (:params) { { :rsyslog_d_dir => 'custom/rsyslog.d' } }
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error)
+      end
+    end
+
+    ['true',true].each do |value|
+      context "with rsyslog_d_dir_purge specified as #{value}" do
+        let :facts do
+          {
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '6',
+          }
+        end
+        let (:params) { { :rsyslog_d_dir_purge => value } }
+
+        it {
+          should contain_file('rsyslog_d_dir').with({
+            'recurse' => true,
+            'purge'   => true,
+          })
+        }
+      end
+    end
+
+    ['false',false].each do |value|
+      context "with rsyslog_d_dir_purge specified as #{value}" do
+        let :facts do
+          {
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '6',
+          }
+        end
+        let (:params) { { :rsyslog_d_dir_purge => value } }
+
+        it {
+          should contain_file('rsyslog_d_dir').with({
+            'recurse' => true,
+            'purge'   => false,
+          })
+        }
+      end
+    end
+
+    context 'with rsyslog_d_dir_purge specified as an invalid value' do
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+        }
+      end
+      let (:params) { { :rsyslog_d_dir_purge => 'invalid' } }
+
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error)
+      end
+    end
+  end
+
   describe 'case is_log_server, default params' do
     let :facts do
       {
