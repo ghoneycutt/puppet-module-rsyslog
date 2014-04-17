@@ -144,6 +144,24 @@ Path to store logs, if $is_log_server is true.
 
 - *Default*: '/srv/logs'
 
+log_dir_owner
+-------
+Owner of the log directory.
+
+- *Default*: 'root'
+
+log_dir_group
+-------
+Group of the log directory.
+
+- *Default*: 'root'
+
+log_dir_mode
+-------
+Mode of the log directory.
+
+- *Default*: '0700'
+
 remote_template
 ---------------
 Template path to store logs from remote hosts, appended after log_dir

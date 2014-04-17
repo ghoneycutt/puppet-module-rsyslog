@@ -214,7 +214,7 @@ describe 'rsyslog' do
         it {
             should contain_file('rsyslog_config') \
             .with_content(/^\$template RemoteHost, "\/foo\/bar\/%HOSTNAME%.log"$/)
-            }
+	}
         end
      end
  end
@@ -625,8 +625,33 @@ describe 'rsyslog' do
       it { should contain_class('common') }
 
       it {
-        should contain_file('/srv/logs').with({
+        should contain_file('log_dir').with({
+	  'ensure'  => 'directory',
+	  'owner'   => 'root',
+	  'group'   => 'root',
+     	  'mode'    => '0700',
           'require' => 'Common::Mkdir_p[/srv/logs]'
+        })
+      }
+    end
+
+    context 'case true, log_dir set' do
+      let :params do
+      {
+	:is_log_server => 'true',
+	:log_dir       => '/foo/bar',
+	:log_dir_owner => 'nobody',
+	:log_dir_group => 'staff',
+	:log_dir_mode  => '0755',
+      }
+      end
+      it {
+        should contain_file('log_dir').with({
+	  'ensure'  => 'directory',
+	  'owner'   => 'nobody',
+	  'group'   => 'staff',
+     	  'mode'    => '0755',
+          'require' => 'Common::Mkdir_p[/foo/bar]',
         })
       }
     end
