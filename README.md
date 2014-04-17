@@ -13,7 +13,7 @@ This module will ensure that sysklogd is absent, which is needed on EL5.
 
 ===
 
-# Compatability #
+# Compatibility #
 
 This module has been tested to work on the following systems with Puppet v3.x and Ruby versions 1.8.7, 1.9.3, and 2.0.0.
 
@@ -134,7 +134,7 @@ Whether a service should be running. Valid values are 'stopped' and 'running'.
 
 is_log_server
 -------------
-Whether the system syslog service is meant to recieve messages from remote hosts. Valid values are 'true' and 'false'.
+Whether the system syslog service is meant to receive messages from remote hosts. Valid values are 'true' and 'false'.
 
 - *Default*: 'false'
 
@@ -152,7 +152,7 @@ Template path to store logs from remote hosts, appended after log_dir
 
 remote_logging
 ----------------------
-Wheter to send logs remotely to a centralized logging service.
+Whether to send logs remotely to a centralized logging service.
 
 - *Default*: 'false'
 
@@ -276,3 +276,10 @@ content
 String with contents of the fragment file.
 
 - *Default*: undef
+
+## Example usage
+<pre>
+rsyslog::rsyslog_fragments:
+  everything:
+    content: "*.* /tmp/everything"
+</pre>
