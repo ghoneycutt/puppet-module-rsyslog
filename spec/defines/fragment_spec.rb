@@ -71,19 +71,21 @@ describe 'rsyslog::fragment' do
     }
   end
 
-  context 'with ensure specified as invalid value' do
-    let(:title) { 'example' }
-    let(:facts) {
-      { :osfamily          => 'RedHat',
-        :lsbmajdistrelease => '6',
+  ['true',true,'present'].each do |value|
+    context "with ensure specified as invalid value (#{value})" do
+      let(:title) { 'example' }
+      let(:facts) {
+        { :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+        }
       }
-    }
-    let(:params) { { :ensure => 'true' } }
+      let(:params) { { :ensure => value } }
 
-    it 'should fail' do
-      expect {
-        should contain_class('rsyslog')
-      }.to raise_error(Puppet::Error)
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error)
+      end
     end
   end
 end

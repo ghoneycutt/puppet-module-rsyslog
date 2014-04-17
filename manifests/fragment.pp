@@ -9,7 +9,7 @@ define rsyslog::fragment (
 
   include rsyslog
 
-  validate_re($ensure, ['file','present','absent'])
+  validate_re($ensure, ['file','absent'])
   validate_string($content)
 
   file { "${rsyslog::rsyslog_d_dir}/${name}.conf":

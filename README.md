@@ -267,7 +267,7 @@ Places a fragment in $rsyslog_d_dir directory
 
 ensure
 ------
-Whether the file should exist or not. Possible values are file, present and absent.
+Whether the file should exist or not. Possible values are file and absent.
 
 - *Default*: 'file'
 
