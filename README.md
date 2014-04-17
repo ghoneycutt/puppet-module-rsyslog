@@ -180,6 +180,12 @@ Mode of the rsyslog.d directory.
 
 - *Default*: '0755'
 
+rsyslog_d_dir_purge
+-------------------
+Boolean to purge unmanaged files from rsyslog.d
+
+- *Default*: true
+
 rsyslog_fragments
 -----------------
 Hash of fragments to pass to rsyslog::fragment

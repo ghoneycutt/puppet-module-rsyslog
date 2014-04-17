@@ -32,6 +32,7 @@ class rsyslog (
   $rsyslog_d_dir_owner      = 'root',
   $rsyslog_d_dir_group      = 'root',
   $rsyslog_d_dir_mode       = '0755',
+  $rsyslog_d_dir_purge      = true,
   $rsyslog_fragments        = undef,
   $spool_dir                = '/var/spool/rsyslog',
   $spool_dir_owner          = 'root',
@@ -171,6 +172,13 @@ class rsyslog (
     $my_enable_udp_server = $default_enable_udp_server
   }
 
+  if type($rsyslog_d_dir_purge) == 'string' {
+    $rsyslog_d_dir_purge_real = str2bool($rsyslog_d_dir_purge)
+  } else {
+    $rsyslog_d_dir_purge_real = $rsyslog_d_dir_purge
+  }
+  validate_bool($rsyslog_d_dir_purge_real)
+
   package { $package:
     ensure => $package_ensure,
   }
@@ -215,6 +223,8 @@ class rsyslog (
     owner   => $rsyslog_d_dir_owner,
     group   => $rsyslog_d_dir_group,
     mode    => $rsyslog_d_dir_mode,
+    recurse => true,
+    purge   => $rsyslog_d_dir_purge_real,
     require => Common::Mkdir_p[$rsyslog_d_dir],
   }
 
