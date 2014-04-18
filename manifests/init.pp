@@ -28,7 +28,7 @@ class rsyslog (
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
   $log_dir_group            = 'root',
-  $log_dir_mode             = '0700',
+  $log_dir_mode             = '0750',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
   $spool_dir                = '/var/spool/rsyslog',

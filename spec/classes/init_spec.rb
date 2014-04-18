@@ -505,10 +505,10 @@ describe 'rsyslog' do
 
       it {
         should contain_file('log_dir').with({
-	  'ensure'  => 'directory',
-	  'owner'   => 'root',
-	  'group'   => 'root',
-     	  'mode'    => '0700',
+          'ensure'  => 'directory',
+          'owner'   => 'root',
+          'group'   => 'root',
+     	    'mode'    => '0750',
           'require' => 'Common::Mkdir_p[/srv/logs]'
         })
       }

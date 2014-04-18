@@ -160,7 +160,7 @@ log_dir_mode
 -------
 Mode of the log directory.
 
-- *Default*: '0700'
+- *Default*: '0750'
 
 remote_template
 ---------------
