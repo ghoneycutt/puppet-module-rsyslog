@@ -134,6 +134,7 @@ class rsyslog (
 
       file { 'log_dir':
         ensure  => directory,
+        path    => $log_dir,
         owner   => $log_dir_owner,
         group   => $log_dir_group,
         mode    => $log_dir_mode,
