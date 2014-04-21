@@ -627,6 +627,7 @@ describe 'rsyslog' do
       it {
         should contain_file('log_dir').with({
           'ensure'  => 'directory',
+          'path'    => '/srv/logs',
           'owner'   => 'root',
           'group'   => 'root',
      	    'mode'    => '0750',
@@ -648,6 +649,7 @@ describe 'rsyslog' do
       it {
         should contain_file('log_dir').with({
 	  'ensure'  => 'directory',
+	  'path'    => '/foo/bar',
 	  'owner'   => 'nobody',
 	  'group'   => 'staff',
      	  'mode'    => '0755',
