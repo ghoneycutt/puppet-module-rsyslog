@@ -66,7 +66,7 @@ class rsyslog (
     'RedHat': {
       $default_service_name   = 'rsyslog'
       $default_sysconfig_path = '/etc/sysconfig/rsyslog'
-      case $::lsbmajdistrelease {
+      case $::operatingsystemmajrelease {
         '5': {
           $default_pid_file = '/var/run/rsyslogd.pid'
           $sysconfig_erb    = 'sysconfig.rhel5.erb'
@@ -76,7 +76,7 @@ class rsyslog (
           $sysconfig_erb    = 'sysconfig.rhel6.erb'
         }
         default: {
-          fail("rsyslog supports RedHat like systems with major release of 5 and 6 and you have ${::lsbmajdistrelease}")
+          fail("rsyslog supports RedHat like systems with major release of 5 and 6 and you have ${::operatingsystemmajrelease}")
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
@@ -92,12 +92,12 @@ class rsyslog (
       $default_service_name   = 'syslog'
       $default_sysconfig_path = '/etc/sysconfig/syslog'
       $default_pid_file       = '/var/run/rsyslogd.pid'
-      case $::lsbmajdistrelease {
+      case $::operatingsystemmajrelease {
         '11' : {
           $sysconfig_erb = 'sysconfig.suse11.erb'
         }
         default: {
-          fail( "rsyslog supports Suse like systems with major release 11, and you have ${::lsbmajdistrelease}" )
+          fail( "rsyslog supports Suse like systems with major release 11, and you have ${::operatingsystemmajrelease}" )
         }
       }
     }
