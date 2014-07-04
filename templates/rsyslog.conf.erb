@@ -1,11 +1,12 @@
 # This file is being maintained by Puppet.
 # DO NOT EDIT
 
-#rsyslog v3 config file
+#rsyslog v<%= @rsyslog_conf_version %> config file
 
 # if you experience problems, check
 # http://www.rsyslog.com/troubleshoot for assistance
 
+<% if @rsyslog_conf_version != '2' -%>
 #### MODULES ####
 
 $ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)
@@ -25,20 +26,27 @@ $ModLoad imtcp.so
 $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 <% end -%>
 
+<% end -%>
 #### GLOBAL DIRECTIVES ####
 
 # Use default timestamp format
+<% if @rsyslog_conf_version == '2' -%>
+$template TraditionalFormat,"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0"
+<% else -%>
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 
 # File syncing capability is disabled by default. This feature is usually not required,
 # not useful and an extreme performance hit
 #$ActionFileEnableSync on
+<% end -%>
 
 #### RULES ####
 
+<% if @rsyslog_conf_version != '2' -%>
 # Local Logging
 $RuleSet local
 
+<% end -%>
 # Log all kernel messages to the console.
 # Logging much else clutters up the screen.
 #kern.*                                                 /dev/console
@@ -66,13 +74,16 @@ uucp,news.crit                                          /var/log/spooler
 # Save boot messages also to boot.log
 local7.*                                                /var/log/boot.log
 
+<% if @rsyslog_conf_version != '2' -%>
 # use the local RuleSet as default if not specified otherwise
 $DefaultRuleset local
 
 # Include all config files in /etc/rsyslog.d/
 $IncludeConfig /etc/rsyslog.d/*.conf
 
+<% end -%>
 <% if @remote_logging_real == 'true' -%>
+<% if @rsyslog_conf_version != '2' -%>
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
 $WorkDirectory <%= @spool_dir %> # where to place spool files
@@ -81,8 +92,10 @@ $ActionQueueMaxDiskSpace <%= @max_spool_size %> # 1gb space limit (use as much a
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
+<% end -%>
 <%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= @log_server -%>:<%= @log_server_port %>
 <% end -%>
+<% if @rsyslog_conf_version != '2' -%>
 
 <% if @is_log_server == 'true' -%>
 # logging from remote
@@ -101,5 +114,6 @@ $InputTCPServerRun 514
 $InputUDPServerBindRuleset remote
 # activate it
 $UDPServerRun 514
+<% end -%>
 <% end -%>
 <% end -%>
