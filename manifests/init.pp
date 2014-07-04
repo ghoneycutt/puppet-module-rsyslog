@@ -31,6 +31,7 @@ class rsyslog (
   $log_dir_mode             = '0750',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
+  $rsyslog_conf_version     = '3',
   $rsyslog_d_dir            = '/etc/rsyslog.d',
   $rsyslog_d_dir_owner      = 'root',
   $rsyslog_d_dir_group      = 'root',
@@ -199,7 +200,7 @@ class rsyslog (
 
   file { 'rsyslog_config':
     ensure  => file,
-    content => template('rsyslog/rsyslog.conf.erb'),
+    content => template("rsyslog/rsyslog.conf.${rsyslog_conf_version}.erb"),
     path    => $config_path,
     owner   => $config_owner,
     group   => $config_group,
