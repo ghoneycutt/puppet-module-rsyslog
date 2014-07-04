@@ -28,6 +28,7 @@ describe 'rsyslog' do
     context 'rsyslog config content' do
       context 'with default params' do
         it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
 
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
@@ -215,6 +216,18 @@ describe 'rsyslog' do
             should contain_file('rsyslog_config') \
             .with_content(/^\$template RemoteHost, "\/foo\/bar\/%HOSTNAME%.log"$/)
 	}
+        end
+
+        context 'with rsyslog_conf_version=2 specified' do
+        let :params do
+        {
+            :rsyslog_conf_version => '2',
+        }
+        end
+        it {
+            should contain_file('rsyslog_config') \
+            .with_content(/^#rsyslog v2 config file$/)
+        }
         end
      end
  end

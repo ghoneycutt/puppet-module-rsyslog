@@ -174,6 +174,13 @@ Whether to send logs remotely to a centralized logging service.
 
 - *Default*: 'false'
 
+rsyslog_conf_version
+--------------------
+Format version of rsyslog.conf file format. Valid values are '2' and '3'.
+Version 2 format is only supported for clients.
+
+- *Default*: '3'
+
 rsyslog_d_dir
 -------------
 Path to place rsyslog.d files.
