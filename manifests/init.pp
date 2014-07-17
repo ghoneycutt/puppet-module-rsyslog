@@ -75,8 +75,12 @@ class rsyslog (
           $default_pid_file = '/var/run/syslogd.pid'
           $sysconfig_erb    = 'sysconfig.rhel6.erb'
         }
+        '7': {
+          $default_pid_file = '/var/run/syslogd.pid'
+          $sysconfig_erb    = 'sysconfig.rhel7.erb'
+        }
         default: {
-          fail("rsyslog supports RedHat like systems with major release of 5 and 6 and you have ${::lsbmajdistrelease}")
+          fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::lsbmajdistrelease}")
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
