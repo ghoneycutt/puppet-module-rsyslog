@@ -1,5 +1,5 @@
 name    'ghoneycutt-rsyslog'
-version '0.7.1'
+version '0.8.0'
 source 'git://github.com/ghoneycutt/puppet-module-rsyslog.git'
 author 'ghoneycutt'
 license 'Apache License, Version 2.0'
