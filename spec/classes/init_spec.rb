@@ -287,6 +287,7 @@ describe 'rsyslog' do
   logrotate_hash = {
     'el5' => { :osfamily => 'RedHat', :release => '5', :pid => '/var/run/rsyslogd.pid' },
     'el6' => { :osfamily => 'RedHat', :release => '6', :pid => '/var/run/syslogd.pid' },
+    'el7' => { :osfamily => 'RedHat', :release => '7', :pid => '/var/run/syslogd.pid' },
     'debian7' => { :osfamily => 'Debian', :release => '7', :pid => '/var/run/rsyslogd.pid' },
     'suse11' => { :osfamily => 'Suse', :release => '11', :pid => '/var/run/rsyslogd.pid' },
   }
@@ -408,6 +409,31 @@ describe 'rsyslog' do
         }
 
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c5"$/) }
+      end
+    end
+
+    context 'on EL 7' do
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '7',
+        }
+      end
+
+      context 'with default params' do
+        it {
+          should contain_file('rsyslog_sysconfig').with({
+            'path'    => '/etc/sysconfig/rsyslog',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'mode'    => '0644',
+            'require' => 'Package[rsyslog]',
+            'notify'  => 'Service[rsyslog_daemon]',
+          })
+        }
+        it {
+          should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c 4"$/)
+        }
       end
     end
 
@@ -736,7 +762,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5 and 6 and you have 4/)
+          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5, 6, 7 and you have 4/)
         end
       end
 
