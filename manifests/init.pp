@@ -96,11 +96,14 @@ class rsyslog (
       $default_sysconfig_path = '/etc/sysconfig/syslog'
       $default_pid_file       = '/var/run/rsyslogd.pid'
       case $::lsbmajdistrelease {
+        '10' : {
+          $sysconfig_erb = 'sysconfig.suse10.erb'
+        }
         '11' : {
           $sysconfig_erb = 'sysconfig.suse11.erb'
         }
         default: {
-          fail( "rsyslog supports Suse like systems with major release 11, and you have ${::lsbmajdistrelease}" )
+          fail( "rsyslog supports Suse like systems with major release 10 and 11, and you have ${::lsbmajdistrelease}" )
         }
       }
     }

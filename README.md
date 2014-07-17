@@ -20,6 +20,7 @@ This module has been tested to work on the following systems with Puppet v3.x an
  * Debian 7
  * EL 5
  * EL 6
+ * Suse 10
  * Suse 11
 
 Older EL 5 and Suse 10/11 systems ships with rsyslog v2.x only. Use rsyslog_conf_version to support them.
