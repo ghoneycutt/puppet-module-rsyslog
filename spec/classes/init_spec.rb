@@ -762,7 +762,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5, 6, 7 and you have 4/)
+          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have 4/)
         end
       end
 
