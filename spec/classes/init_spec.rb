@@ -785,6 +785,16 @@ describe 'rsyslog' do
         end
         it { should contain_class('rsyslog') }
       end
+
+      context 'on supported major release 7' do
+        let :facts do
+          {
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '7',
+          }
+        end
+        it { should contain_class('rsyslog') }
+      end
     end
 
     context 'on supported osfamily, Debian' do
