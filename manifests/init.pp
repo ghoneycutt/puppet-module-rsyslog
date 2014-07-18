@@ -49,6 +49,7 @@ class rsyslog (
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
   $source_facilities        = '*.*',
+  $mail_default_enable      = 'true',
 ) {
 
   # validation
