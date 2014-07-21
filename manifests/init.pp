@@ -9,7 +9,9 @@
 class rsyslog (
   $package                  = 'rsyslog',
   $package_ensure           = 'present',
+  $package_provider         = undef,
   $pid_file                 = 'USE_DEFAULTS',
+  $logrotate_present        = 'USE_DEFAULTS',
   $logrotate_d_config_path  = '/etc/logrotate.d/syslog',
   $logrotate_d_config_owner = 'root',
   $logrotate_d_config_group = 'root',
@@ -98,6 +100,7 @@ class rsyslog (
 
   case $::osfamily {
     'RedHat': {
+      $default_logrotate_present      = true
       $default_logrotate_syslog_files = [
                                           '/var/log/messages',
                                           '/var/log/secure',
@@ -106,8 +109,8 @@ class rsyslog (
                                           '/var/log/boot.log',
                                           '/var/log/cron',
                                         ]
-      $default_service_name     = 'rsyslog'
-      $default_sysconfig_path   = '/etc/sysconfig/rsyslog'
+      $default_service_name           = 'rsyslog'
+      $default_sysconfig_path         = '/etc/sysconfig/rsyslog'
       case $::lsbmajdistrelease {
         '5': {
           $default_pid_file = '/var/run/rsyslogd.pid'
@@ -129,6 +132,7 @@ class rsyslog (
       require 'sysklogd'
     }
     'Debian': {
+      $default_logrotate_present      = true
       $default_logrotate_syslog_files = [
                                           '/var/log/syslog',
                                           '/var/log/mail.info',
@@ -144,12 +148,13 @@ class rsyslog (
                                           '/var/log/debug',
                                           '/var/log/messages',
                                         ]
-      $default_service_name     = 'rsyslog'
-      $default_sysconfig_path   = '/etc/default/rsyslog'
-      $default_pid_file         = '/var/run/rsyslogd.pid'
-      $sysconfig_erb            = 'sysconfig.debian.erb'
+      $default_service_name           = 'rsyslog'
+      $default_sysconfig_path         = '/etc/default/rsyslog'
+      $default_pid_file               = '/var/run/rsyslogd.pid'
+      $sysconfig_erb                  = 'sysconfig.debian.erb'
     }
     'Suse' : {
+      $default_logrotate_present      = true
       $default_logrotate_syslog_files = [
                                           '/var/log/warn',
                                           '/var/log/messages',
@@ -166,9 +171,9 @@ class rsyslog (
                                           '/var/log/news/news.err',
                                           '/var/log/news/news.notice',
                                         ]
-      $default_service_name     = 'syslog'
-      $default_sysconfig_path   = '/etc/sysconfig/syslog'
-      $default_pid_file         = '/var/run/rsyslogd.pid'
+      $default_service_name           = 'syslog'
+      $default_sysconfig_path         = '/etc/sysconfig/syslog'
+      $default_pid_file               = '/var/run/rsyslogd.pid'
       case $::lsbmajdistrelease {
         '10' : {
           $sysconfig_erb = 'sysconfig.suse10.erb'
@@ -177,18 +182,52 @@ class rsyslog (
           $sysconfig_erb = 'sysconfig.suse11.erb'
         }
         default: {
-          fail( "rsyslog supports Suse like systems with major release 10 and 11, and you have ${::lsbmajdistrelease}" )
+          fail("rsyslog supports Suse like systems with major release 10 and 11, and you have ${::lsbmajdistrelease}")
+        }
+      }
+    }
+    'Solaris': {
+      $default_logrotate_present = false
+      case $::kernelrelease {
+        '5.10', '5.11' : {
+          $default_service_name      = 'network/cswrsyslog'
+          $default_pid_file          = '/var/run/rsyslogd.pid'
+        }
+        default: {
+          fail("rsyslog supports Solaris like systems with kernel release 5.10 and 5.11, and you have ${::kernelrelease}")
         }
       }
     }
     default: {
-      fail("rsyslog supports osfamilies RedHat, Suse and Debian. Detected osfamily is ${::osfamily}")
+      fail("rsyslog supports osfamilies RedHat, Suse, Debian and Solaris. Detected osfamily is ${::osfamily}")
     }
   }
 
-  $logrotate_syslog_files_real = $logrotate_syslog_files ? {
-    'USE_DEFAULTS' => $default_logrotate_syslog_files,
-    default        => unique($logrotate_syslog_files)
+  $logrotate_present_test = $logrotate_present ? {
+    'USE_DEFAULTS' => $default_logrotate_present,
+    default        => $logrotate_present
+  }
+
+  $logrotate_present_test_type = type($logrotate_present_test)
+
+  case $logrotate_present_test_type {
+    'string': {
+      $logrotate_present_real = str2bool($logrotate_present_test)
+    }
+    'boolean': {
+      $logrotate_present_real = $logrotate_present_test
+    }
+    default: {
+      fail("rsyslog::logrotate_present must be of type boolean or string. Detected type is <${logrotate_present_test_type}>.")
+    }
+  }
+
+  if $logrotate_present_real {
+    $logrotate_syslog_files_real = $logrotate_syslog_files ? {
+      'USE_DEFAULTS' => $default_logrotate_syslog_files,
+      default        => unique($logrotate_syslog_files)
+    }
+    validate_array($logrotate_syslog_files_real)
   }
 
   $service_name_real = $daemon ? {
@@ -201,13 +240,11 @@ class rsyslog (
     default        => $sysconfig_path
   }
 
-  if $pid_file == 'USE_DEFAULTS' {
-    $pid_file_real = $default_pid_file
-  } else {
-    $pid_file_real = $pid_file
+  $pid_file_real = $pid_file ? {
+    'USE_DEFAULTS' => $default_pid_file,
+    default        => $pid_file
   }
   validate_absolute_path($pid_file_real)
-  validate_array($logrotate_syslog_files_real)
 
   case $is_log_server {
     # logging servers do not log elsewhere
@@ -270,17 +307,33 @@ class rsyslog (
   validate_bool($rsyslog_d_dir_purge_real)
 
   package { $package:
-    ensure => $package_ensure,
+    ensure   => $package_ensure,
+    provider => $package_provider,
   }
 
-  file { 'rsyslog_logrotate_d_config':
-    ensure  => file,
-    path    => $logrotate_d_config_path,
-    owner   => $logrotate_d_config_owner,
-    group   => $logrotate_d_config_group,
-    mode    => $logrotate_d_config_mode,
-    content => template('rsyslog/logrotate.erb'),
-    require => Package[$package],
+  if $::kernel == 'Linux' {
+    file { 'rsyslog_sysconfig':
+      ensure  => file,
+      content => template("rsyslog/${rsyslog::sysconfig_erb}"),
+      path    => $rsyslog::sysconfig_path_real,
+      owner   => $rsyslog::sysconfig_owner,
+      group   => $rsyslog::sysconfig_group,
+      mode    => $rsyslog::sysconfig_mode,
+      require => Package[$package],
+      notify  => Service['rsyslog_daemon'],
+    }
+  }
+
+  if $logrotate_present_real {
+    file { 'rsyslog_logrotate_d_config':
+      ensure  => file,
+      path    => $logrotate_d_config_path,
+      owner   => $logrotate_d_config_owner,
+      group   => $logrotate_d_config_group,
+      mode    => $logrotate_d_config_mode,
+      content => template('rsyslog/logrotate.erb'),
+      require => Package[$package],
+    }
   }
 
   file { 'rsyslog_config':
@@ -294,21 +347,10 @@ class rsyslog (
     notify  => Service['rsyslog_daemon'],
   }
 
-  file { 'rsyslog_sysconfig':
-    ensure  => file,
-    content => template("rsyslog/${sysconfig_erb}"),
-    path    => $sysconfig_path_real,
-    owner   => $sysconfig_owner,
-    group   => $sysconfig_group,
-    mode    => $sysconfig_mode,
-    require => Package[$package],
-    notify  => Service['rsyslog_daemon'],
-  }
-
   common::mkdir_p { $rsyslog_d_dir: }
 
   file { 'rsyslog_d_dir':
-    ensure  => 'directory',
+    ensure  => directory,
     path    => $rsyslog_d_dir,
     owner   => $rsyslog_d_dir_owner,
     group   => $rsyslog_d_dir_group,
@@ -328,7 +370,7 @@ class rsyslog (
     common::mkdir_p { $spool_dir: }
 
     file { 'ryslog_spool_directory':
-      ensure  => 'directory',
+      ensure  => directory,
       path    => $spool_dir,
       owner   => $spool_dir_owner,
       group   => $spool_dir_group,
