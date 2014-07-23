@@ -28,6 +28,7 @@ describe 'rsyslog' do
     context 'rsyslog config content' do
       context 'with default params' do
         it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
 
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
         it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
@@ -216,6 +217,50 @@ describe 'rsyslog' do
             .with_content(/^\$template RemoteHost, "\/foo\/bar\/%HOSTNAME%.log"$/)
 	}
         end
+
+        context 'with rsyslog_conf_version=2 specified' do
+          let :params do
+            {
+              :rsyslog_conf_version => '2',
+            }
+          end
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v2 config file$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$template TraditionalFormat,\"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0\"$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$RuleSet local$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$DefaultRuleset local$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$IncludeConfig \/etc\/rsyslog.d\/*.conf$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$RuleSet remote\n\*.\*?RemoteHost$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
+          it { should_not contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
+        end
+
+        context 'with rsyslog_conf_version specified as invalid value' do
+          let :params do
+            {
+              :rsyslog_conf_version => 'invalid',
+            }
+          end
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2> and <3> as valid values and you have specified <invalid>/)
+          end
+        end
      end
  end
 
@@ -289,6 +334,7 @@ describe 'rsyslog' do
     'el6' => { :osfamily => 'RedHat', :release => '6', :pid => '/var/run/syslogd.pid' },
     'el7' => { :osfamily => 'RedHat', :release => '7', :pid => '/var/run/syslogd.pid' },
     'debian7' => { :osfamily => 'Debian', :release => '7', :pid => '/var/run/rsyslogd.pid' },
+    'suse10' => { :osfamily => 'Suse', :release => '10', :pid => '/var/run/rsyslogd.pid' },
     'suse11' => { :osfamily => 'Suse', :release => '11', :pid => '/var/run/rsyslogd.pid' },
   }
 
@@ -483,6 +529,34 @@ describe 'rsyslog' do
         }
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/) }
+      end
+    end
+
+    context 'on Suse 10' do
+      let :facts do
+        {
+          :osfamily          => 'Suse',
+          :lsbmajdistrelease => '10',
+        }
+      end
+
+      context 'with default params' do
+        it {
+          should contain_file('rsyslog_sysconfig').with({
+            'path'    => '/etc/sysconfig/syslog',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'mode'    => '0644',
+            'require' => 'Package[rsyslog]',
+            'notify'  => 'Service[rsyslog_daemon]',
+          })
+        }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^KERNEL_LOGLEVEL=1$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_PARAMS=""$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_PARAMS="-x"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_DAEMON="rsyslogd"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_CREATE_CONFIG="yes"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_PARAMS=""$/) }
       end
     end
 
@@ -805,18 +879,28 @@ describe 'rsyslog' do
     end
 
     context 'on supported osfamily, Suse' do
-      context 'on unsupported major release 10' do
+      context 'on unsupported major release 9' do
+        let :facts do
+          {
+            :osfamily          => 'Suse',
+            :lsbmajdistrelease => '9',
+          }
+        end
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/rsyslog supports Suse like systems with major release 10 and 11, and you have 9/)
+        end
+      end
+
+      context 'on supported major release 10' do
         let :facts do
           {
             :osfamily          => 'Suse',
             :lsbmajdistrelease => '10',
           }
         end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports Suse like systems with major release 11, and you have 10/)
-        end
+        it { should contain_class('rsyslog') }
       end
 
       context 'on supported major release 11' do
