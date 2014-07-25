@@ -667,7 +667,7 @@ describe 'rsyslog' do
       let :params do
         {
           :remote_logging => 'true',
-          :log_servers    => 'true'
+          :log_servers    => log_servers
         }
       end 
       it {
