@@ -1,6 +1,13 @@
 require 'spec_helper'
 describe 'rsyslog' do
 
+  log_servers = [ {
+    'host' 			=> 'camomonitor003.mo.ca.am.ericsson.se',
+    'transport_protocol'	=> 'tcp',
+    'host_port'			=> 514,
+    'source_facilities'		=> '*.*',
+  } ]
+
   describe 'rsyslog_config' do
     let :facts do
       {
@@ -125,23 +132,9 @@ describe 'rsyslog' do
 
       context 'with remote_logging enabled' do
         let :params do
-          { :remote_logging => 'true' }
-        end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514/) }
-      end
-
-      context 'with remote_logging enabled and source_facilities specified' do
-        let :params do
           {
-            :remote_logging    => 'true',
-            :source_facilities => '*.*;user.none',
+            :remote_logging => 'true',
+            :log_servers    => log_servers, 
           }
         end
         it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
@@ -151,59 +144,9 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
         it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
         it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\*;user.none @@log.defaultdomain:514/) }
       end
 
-      context 'with remote_logging enabled and transport_protocol=tcp specified' do
-        let :params do
-          {
-            :remote_logging     => 'true',
-            :transport_protocol => 'tcp',
-          }
-        end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
-      end
-
-      context 'with remote_logging enabled and transport_protocol=udp specified' do
-        let :params do
-          {
-            :remote_logging     => 'true',
-            :transport_protocol => 'udp',
-          }
-        end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* @log.defaultdomain:514$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-      end
-
-      context 'with source_facilities set to an empty string' do
-        let :params do
-          { :source_facilities => '' }
-        end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog::source_facilities cannot be empty!/)
-        end
-      end
-
-        context 'with log_dir and remote_template set' do
+      context 'with log_dir and remote_template set' do
         let :params do
         {
             :is_log_server   => 'true',
@@ -695,7 +638,12 @@ describe 'rsyslog' do
       }
     end
     context 'case true' do
-      let(:params) { { :remote_logging => 'true' } }
+      let :params {
+        {
+          :remote_logging => 'true',
+          :log_servers    => 'true'
+        }
+      }
       it {
         should contain_file('ryslog_spool_directory').with({
           'ensure'  => 'directory',

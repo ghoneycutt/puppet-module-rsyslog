@@ -138,6 +138,12 @@ Whether the system syslog service is meant to receive messages from remote hosts
 
 - *Default*: 'false'
 
+transport_protocol
+------------------
+Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
+
+- *Default*: 'tcp'
+
 log_dir
 -------
 Path to store logs, if $is_log_server is true.
@@ -240,23 +246,11 @@ Maximum disk space used by spool files. Uses one letter units such as k, m and g
 
 - *Default*: '1g'
 
-transport_protocol
-------------------
-Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
-
-- *Default*: 'tcp'
-
-log_server
+log_servers
 ----------
-Server to send logs to if remote_logging is true.
+List of server to send logs to if remote_logging is true.
 
-- *Default*: "log.${::domain}"
-
-log_server_port
----------------
-Port of the server to send logs to if remote_logging is true.
-
-- *Default*: '514'
+- *Default*: undef
 
 enable_tcp_server
 -----------------
@@ -275,12 +269,6 @@ kernel_target
 Target of kernel logs.
 
 - *Default*: '/var/log/messages'
-
-source_facilities
------------------
-List of source facilities to be sent to remote log server. Only used if remote_logging is true.
-
-- *Default*: `*.*`
 
 ===
 
@@ -306,4 +294,17 @@ String with contents of the fragment file.
 rsyslog::rsyslog_fragments:
   everything:
     content: "*.* /tmp/everything"
+</pre>
+
+<pre>
+rsyslog::log_servers:
+  - host: 'log.example.net'
+    transport_protocol: 'tcp'
+    host_port: 514
+    source_facilities: '*.*'
+  - host: 'log1.example.net'
+    transport_protocol: 'udp'
+    host_port: 514
+    source_facilities: '*.*'
+
 </pre>
