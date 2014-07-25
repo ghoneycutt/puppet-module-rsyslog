@@ -25,6 +25,7 @@ class rsyslog (
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
   $is_log_server            = 'false',
+  $transport_protocol       = 'tcp',
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
   $log_dir_group            = 'root',
@@ -42,19 +43,11 @@ class rsyslog (
   $spool_dir_group          = 'root',
   $spool_dir_mode           = '0700',
   $max_spool_size           = '1g',
-  $transport_protocol       = 'tcp',
-  $log_server               = "log.${::domain}",
-  $log_server_port          = '514',
+  $log_servers              = undef,
   $enable_tcp_server        = undef,
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
-  $source_facilities        = '*.*',
 ) {
-
-  # validation
-  if $source_facilities == '' {
-    fail('rsyslog::source_facilities cannot be empty!')
-  }
 
   if $rsyslog_fragments != undef {
     create_resources('rsyslog::fragment', $rsyslog_fragments)
