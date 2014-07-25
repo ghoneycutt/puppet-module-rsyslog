@@ -664,12 +664,12 @@ describe 'rsyslog' do
       }
     end
     context 'case true' do
-      let :params {
+      let :params do
         {
           :remote_logging => 'true',
           :log_servers    => 'true'
         }
-      }
+      end 
       it {
         should contain_file('ryslog_spool_directory').with({
           'ensure'  => 'directory',
