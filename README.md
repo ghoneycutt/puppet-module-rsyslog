@@ -22,6 +22,8 @@ This module has been tested to work on the following systems with Puppet v3.x an
  * EL 6
  * Suse 11
 
+Older EL 5 and Suse 10/11 systems ships with rsyslog v2.x only. Use rsyslog_conf_version to support them.
+
 ===
 
 # Parameters #
@@ -173,6 +175,13 @@ remote_logging
 Whether to send logs remotely to a centralized logging service.
 
 - *Default*: 'false'
+
+rsyslog_conf_version
+--------------------
+Format version of rsyslog.conf file format. Valid values are '2' and '3'.
+Use version 3 for rsyslog 3 and above. Version 2 format is only supported for clients.
+
+- *Default*: '3'
 
 rsyslog_d_dir
 -------------
