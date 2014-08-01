@@ -31,6 +31,7 @@ class rsyslog (
   $log_dir_mode             = '0750',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
+  $rsyslog_conf_version     = 'USE_DEFAULTS',
   $rsyslog_d_dir            = '/etc/rsyslog.d',
   $rsyslog_d_dir_owner      = 'root',
   $rsyslog_d_dir_group      = 'root',
@@ -54,6 +55,23 @@ class rsyslog (
   # validation
   if $source_facilities == '' {
     fail('rsyslog::source_facilities cannot be empty!')
+  }
+
+  case $rsyslog_conf_version {
+    'USE_DEFAULTS': {
+      case versioncmp($::rsyslog_version, 3) {
+        '0','1': {
+          $rsyslog_conf_version_real = '3'
+        }
+        default: {
+          $rsyslog_conf_version_real = '2'
+        }
+      }
+    }
+    default: {
+      validate_re($rsyslog_conf_version, '^(2)|(3)$', "rsyslog_conf_version only knows <2>, <3> and <USE_DEFAULTS> as valid values and you have specified <${rsyslog_conf_version}>.")
+      $rsyslog_conf_version_real = $rsyslog_conf_version
+    }
   }
 
   if $rsyslog_fragments != undef {
@@ -97,11 +115,14 @@ class rsyslog (
       $default_sysconfig_path = '/etc/sysconfig/syslog'
       $default_pid_file       = '/var/run/rsyslogd.pid'
       case $::lsbmajdistrelease {
+        '10' : {
+          $sysconfig_erb = 'sysconfig.suse10.erb'
+        }
         '11' : {
           $sysconfig_erb = 'sysconfig.suse11.erb'
         }
         default: {
-          fail( "rsyslog supports Suse like systems with major release 11, and you have ${::lsbmajdistrelease}" )
+          fail( "rsyslog supports Suse like systems with major release 10 and 11, and you have ${::lsbmajdistrelease}" )
         }
       }
     }
