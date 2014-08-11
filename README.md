@@ -68,6 +68,13 @@ Mode of the logrotate config file.
 
 - *Default*: '0644'
 
+logrotate_syslog_files
+----------------------
+Array of files which should be log rotated by /etc/logrotate.d/syslog ($logrotate_d_config_path).
+'USE_DEFAULTS' will choose the files based on the osfamily.
+
+- *Default*:  'USE_DEFAULTS'
+
 config_path
 -----------
 Path of the rsyslog config file.

@@ -203,6 +203,17 @@ describe 'rsyslog' do
         end
       end
 
+      context 'with logrotate_syslog_files set to an invalid type' do
+        let :params do
+          { :logrotate_syslog_files => 'string' }
+        end
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/\"string\" is not an Array.  It looks to be a String/)
+        end
+      end
+
         context 'with log_dir and remote_template set' do
         let :params do
         {
@@ -285,15 +296,16 @@ describe 'rsyslog' do
   end
 
   logrotate_hash = {
-    'el5' => { :osfamily => 'RedHat', :release => '5', :pid => '/var/run/rsyslogd.pid' },
-    'el6' => { :osfamily => 'RedHat', :release => '6', :pid => '/var/run/syslogd.pid' },
-    'el7' => { :osfamily => 'RedHat', :release => '7', :pid => '/var/run/syslogd.pid' },
-    'debian7' => { :osfamily => 'Debian', :release => '7', :pid => '/var/run/rsyslogd.pid' },
-    'suse11' => { :osfamily => 'Suse', :release => '11', :pid => '/var/run/rsyslogd.pid' },
+    'redhat5' => { :osfamily => 'RedHat', :release => '5' },
+    'redhat6' => { :osfamily => 'RedHat', :release => '6' },
+    'redhat7' => { :osfamily => 'RedHat', :release => '7' },
+    'debian7' => { :osfamily => 'Debian', :release => '7' },
+    'suse11'  => { :osfamily => 'Suse',   :release => '11' },
   }
 
   describe 'rsyslog_logrotate_d_config' do
     logrotate_hash.sort.each do |k,v|
+      logrotate_fixture = File.read(fixtures("#{k}.logrotate"))
       context "with default params on #{v[:osfamily]} #{v[:release]}" do
         let :facts do
           {
@@ -311,7 +323,32 @@ describe 'rsyslog' do
           })
         }
 
-        it { should contain_file('rsyslog_logrotate_d_config').with_content(
+        it { should contain_file('rsyslog_logrotate_d_config').with_content(logrotate_fixture) }
+      end
+    end
+  end
+
+  describe 'with logrotate_syslog_files with duplicate files' do
+    context 'specified' do
+      let(:params) { { :logrotate_syslog_files => [ '/var/log/messages', '/var/log/secure', '/var/log/maillog', '/var/log/spooler', '/var/log/boot.log', '/var/log/cron', '/var/log/cron', ]  } }
+      let :facts do
+        {
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '5',
+        }
+      end
+
+      it {
+        should contain_file('rsyslog_logrotate_d_config').with({
+          'path'    => '/etc/logrotate.d/syslog',
+          'owner'   => 'root',
+          'group'   => 'root',
+          'mode'    => '0644',
+          'require' => 'Package[rsyslog]',
+        })
+      }
+
+      it { should contain_file('rsyslog_logrotate_d_config').with_content(
 %{# This file is being maintained by Puppet.
 # DO NOT EDIT
 
@@ -324,12 +361,11 @@ describe 'rsyslog' do
 {
     sharedscripts
     postrotate
-        /bin/kill -HUP `cat #{v[:pid]} 2> /dev/null` 2> /dev/null || true
+        /bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
     endscript
 }
 })
         }
-      end
     end
   end
 
@@ -338,8 +374,8 @@ describe 'rsyslog' do
       let(:params) { { :pid_file => '/path/to/syslog.pid' } }
       let :facts do
         {
-          :osfamily          => 'Debian',
-          :lsbmajdistrelease => '7',
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
         }
       end
 
