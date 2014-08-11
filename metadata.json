@@ -1,0 +1,68 @@
+{
+  "name": "ghoneycutt-rsyslog",
+  "version": "0.9.0",
+  "author": "ghoneycutt",
+  "summary": "Manage rsyslog",
+  "license": "Apache License, Version 2.0",
+  "source": "git://github.com/ghoneycutt/puppet-module-rsyslog.git",
+  "project_page": "https://github.com/ghoneycutt/puppet-module-rsyslog",
+  "issues_url": "https://github.com/ghoneycutt/puppet-module-rsyslog/issues",
+  "description": "Manage rsyslog",
+  "dependencies": [
+    {"name":"ghoneycutt/sysklogd","version_requirement":">= 1.0.0"},
+    {"name":"ghoneycutt/common","version_requirement":">= 1.0.0"},
+    {"name":"puppetlabs/stdlib","version_requirement":">= 3.2.0"}
+  ],
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": "3.2.x"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": "3.x"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "operatingsystem": "SLES"
+    },
+    {
+      "operatingsystem": "SLED"
+    }
+  ]
+}
