@@ -20,6 +20,7 @@ This module has been tested to work on the following systems with Puppet v3.x an
  * Debian 7
  * EL 5
  * EL 6
+ * Suse 10
  * Suse 11
 
 ===

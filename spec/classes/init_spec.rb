@@ -346,6 +346,7 @@ describe 'rsyslog' do
     'redhat6' => { :osfamily => 'RedHat', :release => '6' },
     'redhat7' => { :osfamily => 'RedHat', :release => '7' },
     'debian7' => { :osfamily => 'Debian', :release => '7' },
+    'suse10'  => { :osfamily => 'Suse',   :release => '10' },
     'suse11'  => { :osfamily => 'Suse',   :release => '11' },
   }
 
@@ -565,6 +566,34 @@ describe 'rsyslog' do
         }
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/) }
+      end
+    end
+
+    context 'on Suse 10' do
+      let :facts do
+        {
+          :osfamily => 'Suse',
+          :lsbmajdistrelease => '10',
+        }
+      end
+
+      context 'with default params' do
+        it {
+          should contain_file('rsyslog_sysconfig').with({
+            'path' => '/etc/sysconfig/syslog',
+            'owner' => 'root',
+            'group' => 'root',
+            'mode' => '0644',
+            'require' => 'Package[rsyslog]',
+            'notify' => 'Service[rsyslog_daemon]',
+          })
+        }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^KERNEL_LOGLEVEL=1$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_PARAMS=""$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_PARAMS="-x"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_DAEMON="rsyslogd"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_CREATE_CONFIG="yes"$/) }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_PARAMS=""$/) }
       end
     end
 
@@ -887,18 +916,28 @@ describe 'rsyslog' do
     end
 
     context 'on supported osfamily, Suse' do
-      context 'on unsupported major release 10' do
+      context 'on unsupported major release 9' do
+        let :facts do
+          {
+            :osfamily          => 'Suse',
+            :lsbmajdistrelease => '9',
+          }
+        end
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/rsyslog supports Suse like systems with major release 10 and 11, and you have 9/)
+        end
+      end
+
+      context 'on supported major release 10' do
         let :facts do
           {
             :osfamily          => 'Suse',
             :lsbmajdistrelease => '10',
           }
         end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports Suse like systems with major release 11, and you have 10/)
-        end
+        it { should contain_class('rsyslog') }
       end
 
       context 'on supported major release 11' do
