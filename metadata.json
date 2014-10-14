@@ -1,6 +1,6 @@
 {
   "name": "ghoneycutt-rsyslog",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "author": "ghoneycutt",
   "summary": "Manage rsyslog",
   "license": "Apache License, Version 2.0",
@@ -34,28 +34,32 @@
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "5",
-        "6"
+        "6",
+        "7"
       ]
     },
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
         "5",
-        "6"
+        "6",
+        "7"
       ]
     },
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
         "5",
-        "6"
+        "6",
+        "7"
       ]
     },
     {
       "operatingsystem": "Scientific",
       "operatingsystemrelease": [
         "5",
-        "6"
+        "6",
+        "7"
       ]
     },
     {
@@ -63,6 +67,13 @@
     },
     {
       "operatingsystem": "SLED"
+    },
+    {
+      "operatingsystem": "Solaris",
+      "operatingsystemrelease": [
+        "10",
+        "11"
+      ]
     }
   ]
 }
