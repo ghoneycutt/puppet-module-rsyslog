@@ -11,6 +11,7 @@ describe 'rsyslog::fragment' do
     }
     let(:facts) {
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '5',
       }
@@ -36,7 +37,9 @@ describe 'rsyslog::fragment' do
   context 'with content specified as invalid string' do
     let(:title) { 'example' }
     let(:facts) {
-      { :osfamily          => 'RedHat',
+      {
+        :kernel            => 'Linux',
+        :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
     }
@@ -52,7 +55,9 @@ describe 'rsyslog::fragment' do
   context 'with ensure specified as absent' do
     let(:title) { 'example' }
     let(:facts) {
-      { :osfamily          => 'RedHat',
+      {
+        :kernel            => 'Linux',
+        :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
     }
@@ -75,7 +80,9 @@ describe 'rsyslog::fragment' do
     context "with ensure specified as invalid value (#{value})" do
       let(:title) { 'example' }
       let(:facts) {
-        { :osfamily          => 'RedHat',
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
       }

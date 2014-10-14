@@ -4,6 +4,7 @@ describe 'rsyslog' do
   describe 'rsyslog_config' do
     let :facts do
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
         :domain            => 'defaultdomain',
@@ -279,6 +280,7 @@ describe 'rsyslog' do
   describe 'rsyslog_package' do
     let :facts do
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
@@ -308,6 +310,16 @@ describe 'rsyslog' do
       }
     end
 
+    context 'with package_provider=pkgutil' do
+      let (:params) { { :package_provider => 'pkgutil' } }
+      it {
+        should contain_package('rsyslog').with({
+          'ensure'   => 'present',
+          'provider' => 'pkgutil',
+        })
+      }
+    end
+
     context 'with package_ensure=absent' do
       let (:params) { { :package_ensure => 'absent' } }
       it {
@@ -321,6 +333,7 @@ describe 'rsyslog' do
   describe 'rsyslog_daemon' do
     let :facts do
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
@@ -383,35 +396,62 @@ describe 'rsyslog' do
   end
 
   logrotate_hash = {
-    'redhat5' => { :osfamily => 'RedHat', :release => '5' },
-    'redhat6' => { :osfamily => 'RedHat', :release => '6' },
-    'redhat7' => { :osfamily => 'RedHat', :release => '7' },
-    'debian7' => { :osfamily => 'Debian', :release => '7' },
-    'suse10'  => { :osfamily => 'Suse',   :release => '10' },
-    'suse11'  => { :osfamily => 'Suse',   :release => '11' },
+    'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :logrotate_present => true },
+    'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :logrotate_present => true },
+    'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :logrotate_present => true },
+    'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :logrotate_present => true },
+    'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :logrotate_present => true },
+    'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :logrotate_present => true },
+    'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :logrotate_present => false },
+    'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :logrotate_present => false },
   }
 
   describe 'rsyslog_logrotate_d_config' do
     logrotate_hash.sort.each do |k,v|
-      logrotate_fixture = File.read(fixtures("#{k}.logrotate"))
-      context "with default params on #{v[:osfamily]} #{v[:release]}" do
-        let :facts do
-          {
-            :osfamily          => v[:osfamily],
-            :lsbmajdistrelease => v[:release],
-          }
-        end
-        it {
-          should contain_file('rsyslog_logrotate_d_config').with({
-            'path'    => '/etc/logrotate.d/syslog',
-            'owner'   => 'root',
-            'group'   => 'root',
-            'mode'    => '0644',
-            'require' => 'Package[rsyslog]',
-          })
-        }
+      if v[:logrotate_present]
+        logrotate_fixture = File.read(fixtures("#{k}.logrotate"))
+      end
 
-        it { should contain_file('rsyslog_logrotate_d_config').with_content(logrotate_fixture) }
+      context "with default params on #{v[:osfamily]} #{v[:release]}" do
+        let :params do
+          { :logrotate_present => v[:logrotate_present] }
+        end
+
+        if v[:kernel] == 'Linux'
+          let :facts do
+            {
+              :kernel            => v[:kernel],
+              :osfamily          => v[:osfamily],
+              :lsbmajdistrelease => v[:release],
+            }
+          end
+        elsif v[:kernel] == 'Solaris'
+          let :facts do
+            {
+              :kernel        => v[:kernel],
+              :osfamily      => v[:osfamily],
+              :kernelrelease => v[:release],
+            }
+          end
+        end
+
+        if v[:logrotate_present]
+          it {
+            should contain_file('rsyslog_logrotate_d_config').with({
+              'path'    => '/etc/logrotate.d/syslog',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'mode'    => '0644',
+              'require' => 'Package[rsyslog]',
+            })
+          }
+
+          it { should contain_file('rsyslog_logrotate_d_config').with_content(logrotate_fixture) }
+        else
+          it { should_not contain_file('rsyslog_logrotate_d_config') }
+
+          it { should_not contain_file('rsyslog_logrotate_d_config').with_content(logrotate_fixture) }
+        end
       end
     end
   end
@@ -421,6 +461,7 @@ describe 'rsyslog' do
       let(:params) { { :logrotate_syslog_files => [ '/var/log/messages', '/var/log/secure', '/var/log/maillog', '/var/log/spooler', '/var/log/boot.log', '/var/log/cron', '/var/log/cron', ]  } }
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '5',
         }
@@ -462,6 +503,7 @@ describe 'rsyslog' do
       let(:params) { { :pid_file => '/path/to/syslog.pid' } }
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -501,6 +543,7 @@ describe 'rsyslog' do
       let(:params) { { :pid_file => 'invalid/path/to/syslog.pid' } }
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'Debian',
           :lsbmajdistrelease => '7',
         }
@@ -517,7 +560,10 @@ describe 'rsyslog' do
   describe 'rsyslog_sysconfig' do
     context 'on Debian' do
       let :facts do
-        { :osfamily => 'Debian' }
+        {
+          :kernel   => 'Linux',
+          :osfamily => 'Debian',
+        }
       end
 
       context 'with default params' do
@@ -539,6 +585,7 @@ describe 'rsyslog' do
     context 'on EL 7' do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '7',
         }
@@ -564,6 +611,7 @@ describe 'rsyslog' do
     context 'on EL 6' do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -589,6 +637,7 @@ describe 'rsyslog' do
     context 'on EL 5' do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '5',
         }
@@ -613,7 +662,8 @@ describe 'rsyslog' do
     context 'on Suse 10' do
       let :facts do
         {
-          :osfamily => 'Suse',
+          :kernel            => 'Linux',
+          :osfamily          => 'Suse',
           :lsbmajdistrelease => '10',
         }
       end
@@ -641,6 +691,7 @@ describe 'rsyslog' do
     context 'on Suse 11' do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'Suse',
           :lsbmajdistrelease => '11',
         }
@@ -673,6 +724,7 @@ describe 'rsyslog' do
     context "with default params" do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -694,6 +746,7 @@ describe 'rsyslog' do
     context "with rsyslog_d_dir parameters specified" do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -723,6 +776,7 @@ describe 'rsyslog' do
     context "with rsyslog_d_dir specified as invalid path" do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -739,6 +793,7 @@ describe 'rsyslog' do
       context "with rsyslog_d_dir_purge specified as #{value}" do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '6',
           }
@@ -758,6 +813,7 @@ describe 'rsyslog' do
       context "with rsyslog_d_dir_purge specified as #{value}" do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '6',
           }
@@ -776,6 +832,7 @@ describe 'rsyslog' do
     context 'with rsyslog_d_dir_purge specified as an invalid value' do
       let :facts do
         {
+          :kernel            => 'Linux',
           :osfamily          => 'RedHat',
           :lsbmajdistrelease => '6',
         }
@@ -793,6 +850,7 @@ describe 'rsyslog' do
   describe 'case is_log_server, default params' do
     let :facts do
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
@@ -849,6 +907,7 @@ describe 'rsyslog' do
   describe 'case transport_protocol, default params' do
     let :facts do
       {
+        :kernel            => 'Linux',
         :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
@@ -868,7 +927,8 @@ describe 'rsyslog' do
   describe 'case remote_logging, default params' do
     let :facts do
       {
-        :osfamily => 'RedHat',
+        :kernel            => 'Linux',
+        :osfamily          => 'RedHat',
         :lsbmajdistrelease => '6',
       }
     end
@@ -907,6 +967,7 @@ describe 'rsyslog' do
       context 'on unsupported major release 4' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '4',
           }
@@ -921,6 +982,7 @@ describe 'rsyslog' do
       context 'on supported major release 5' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '5',
           }
@@ -931,6 +993,7 @@ describe 'rsyslog' do
       context 'on supported major release 6' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '6',
           }
@@ -941,6 +1004,7 @@ describe 'rsyslog' do
       context 'on supported major release 7' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '7',
           }
@@ -950,16 +1014,20 @@ describe 'rsyslog' do
     end
 
     context 'on supported osfamily, Debian' do
-        let :facts do
-            { :osfamily => 'Debian' }
-        end
-        it { should contain_class('rsyslog') }
+      let :facts do
+        {
+          :kernel   => 'Linux',
+          :osfamily => 'Debian',
+        }
+      end
+      it { should contain_class('rsyslog') }
     end
 
     context 'on supported osfamily, Suse' do
       context 'on unsupported major release 9' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'Suse',
             :lsbmajdistrelease => '9',
           }
@@ -974,6 +1042,7 @@ describe 'rsyslog' do
       context 'on supported major release 10' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'Suse',
             :lsbmajdistrelease => '10',
           }
@@ -984,6 +1053,7 @@ describe 'rsyslog' do
       context 'on supported major release 11' do
         let :facts do
           {
+            :kernel            => 'Linux',
             :osfamily          => 'Suse',
             :lsbmajdistrelease => '11',
           }
@@ -992,12 +1062,42 @@ describe 'rsyslog' do
       end
     end
 
-    context 'on unsupported osfamily, Solaris' do
-      let(:facts) { { :osfamily => 'Solaris' } }
-      it do
-        expect {
-          should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog supports osfamilies RedHat, Suse and Debian. Detected osfamily is Solaris/)
+    context 'on supported osfamily, Solaris' do
+      context 'on supported major release 10' do
+        let(:facts) do
+          {
+            :kernel        => 'SunOS',
+            :osfamily      => 'Solaris',
+            :kernelrelease => '5.10',
+          }
+        end
+        it { should contain_class('rsyslog') }
+      end
+
+      context 'on supported major release 11' do
+        let(:facts) do
+          {
+            :kernel        => 'SunOS',
+            :osfamily      => 'Solaris',
+            :kernelrelease => '5.11',
+          }
+        end
+        it { should contain_class('rsyslog') }
+      end
+
+      context 'on unsupported major release 9' do
+        let(:facts) do
+          {
+            :kernel        => 'SunOS',
+            :osfamily      => 'Solaris',
+            :kernelrelease => '5.9',
+          }
+        end
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/rsyslog supports Solaris like systems with kernel release 5.10 and 5.11, and you have 5.9/)
+        end
       end
     end
   end
