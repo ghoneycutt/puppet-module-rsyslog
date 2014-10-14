@@ -327,18 +327,59 @@ describe 'rsyslog' do
     end
 
     context 'with default params' do
-      it { should contain_service('rsyslog_daemon').with( { 'name' => 'rsyslog' } ) }
-    end
-
-    context 'with daemon_ensure=stopped' do
-      let (:params) { { :daemon_ensure => 'stopped' } }
       it {
         should contain_service('rsyslog_daemon').with({
           'name'   => 'rsyslog',
-          'ensure' => 'stopped',
+          'ensure' => 'running',
+          'enable' => 'true',
         })
       }
     end
+
+    ['stopped','running'].each do |value|
+      context "with daemon_ensure=#{value}" do
+        let (:params) { { :daemon_ensure => value } }
+
+        it {
+          should contain_service('rsyslog_daemon').with({
+            'name'   => 'rsyslog',
+            'ensure' => value,
+          })
+        }
+      end
+    end
+
+    context 'with daemon_ensure=invalid' do
+      let (:params) { { :daemon_ensure => 'invalid' } }
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error,/daemon_ensure may be either \'running\' or \'stopped\' and is set to <invalid>./)
+      end
+    end
+
+    ['true',true,'false',false,'manual'].each do |value|
+      context "with daemon_enable=#{value}" do
+        let (:params) { { :daemon_enable => value } }
+
+        it {
+          should contain_service('rsyslog_daemon').with({
+            'name'   => 'rsyslog',
+            'enable' => value,
+          })
+        }
+      end
+    end
+
+    context 'with daemon_enable=invalid' do
+      let (:params) { { :daemon_enable => 'invalid' } }
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error,/daemon_enable may be either \'true\', \'false\' or \'manual\' and is set to <invalid>./)
+      end
+    end
+
   end
 
   logrotate_hash = {

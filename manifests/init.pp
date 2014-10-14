@@ -25,6 +25,7 @@ class rsyslog (
   $sysconfig_mode           = '0644',
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
+  $daemon_enable            = 'true',
   $is_log_server            = 'false',
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
@@ -79,7 +80,21 @@ class rsyslog (
     create_resources('rsyslog::fragment', $rsyslog_fragments)
   }
 
+  case $daemon_enable {
+    'true',true: {
+      $daemon_enable_real = 'true'
+    }
+    'false',false: {
+      $daemon_enable_real = 'false'
+    }
+    'manual': {
+      $daemon_enable_real = 'manual'
+    }
+  }
+
   validate_absolute_path($rsyslog_d_dir)
+  validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
+  validate_re($daemon_enable_real, '^(true|false|manual)$', "daemon_enable may be either 'true', 'false' or 'manual' and is set to <${daemon_enable}>.")
 
   case $::osfamily {
     'RedHat': {
@@ -305,6 +320,7 @@ class rsyslog (
 
   service { 'rsyslog_daemon':
     ensure     => $daemon_ensure,
+    enable     => $daemon_enable_real,
     name       => $service_name_real,
   }
 

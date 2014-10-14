@@ -140,6 +140,12 @@ Whether a service should be running. Valid values are 'stopped' and 'running'.
 
 - *Default*: 'running'
 
+daemon_enable
+-------------
+Whether a service should be enabled to start at boot. Valid values are 'true', 'false', 'manual'.
+
+- *Default*: 'true'
+
 is_log_server
 -------------
 Whether the system syslog service is meant to receive messages from remote hosts. Valid values are 'true' and 'false'.
