@@ -111,6 +111,8 @@ class rsyslog (
                                         ]
       $default_service_name           = 'rsyslog'
       $default_sysconfig_path         = '/etc/sysconfig/rsyslog'
+      # Works around new vs. old facter issue -tthayer
+      # start workaround
       if $::lsbmajdistrelease == undef {
         $majorversion = $::operatingsystemmajrelease
       }
@@ -134,6 +136,7 @@ class rsyslog (
           fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${majorversion}")
         }
       }
+      #end workaround
       # ensures that sysklogd is absent, which is needed on EL5
       require 'sysklogd'
     }
