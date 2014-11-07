@@ -33,6 +33,7 @@ class rsyslog (
   $log_dir_owner            = 'root',
   $log_dir_group            = 'root',
   $log_dir_mode             = '0750',
+  $modules_loaded           = ['imuxsock.so', 'imklog.so', 'imfile'],
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = 'false',
   $rsyslog_conf_version     = 'USE_DEFAULTS',
