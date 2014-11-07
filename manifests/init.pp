@@ -97,18 +97,11 @@ class rsyslog (
   validate_absolute_path($rsyslog_d_dir)
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
   validate_re($daemon_enable_real, '^(true|false|manual)$', "daemon_enable may be either 'true', 'false' or 'manual' and is set to <${daemon_enable}>.")
+  validate_absolute_path($kernel_target)
 
   case $::osfamily {
     'RedHat': {
       $default_logrotate_present      = true
-      $default_logrotate_syslog_files = [
-                                          '/var/log/messages',
-                                          '/var/log/secure',
-                                          '/var/log/maillog',
-                                          '/var/log/spooler',
-                                          '/var/log/boot.log',
-                                          '/var/log/cron',
-                                        ]
       $default_service_name           = 'rsyslog'
       $default_sysconfig_path         = '/etc/sysconfig/rsyslog'
       case $::lsbmajdistrelease {
@@ -133,21 +126,6 @@ class rsyslog (
     }
     'Debian': {
       $default_logrotate_present      = true
-      $default_logrotate_syslog_files = [
-                                          '/var/log/syslog',
-                                          '/var/log/mail.info',
-                                          '/var/log/mail.warn',
-                                          '/var/log/mail.err',
-                                          '/var/log/mail.log',
-                                          '/var/log/daemon.log',
-                                          '/var/log/kern.log',
-                                          '/var/log/auth.log',
-                                          '/var/log/user.log',
-                                          '/var/log/lpr.log',
-                                          '/var/log/cron.log',
-                                          '/var/log/debug',
-                                          '/var/log/messages',
-                                        ]
       $default_service_name           = 'rsyslog'
       $default_sysconfig_path         = '/etc/default/rsyslog'
       $default_pid_file               = '/var/run/rsyslogd.pid'
@@ -155,22 +133,6 @@ class rsyslog (
     }
     'Suse' : {
       $default_logrotate_present      = true
-      $default_logrotate_syslog_files = [
-                                          '/var/log/warn',
-                                          '/var/log/messages',
-                                          '/var/log/allmessages',
-                                          '/var/log/localmessages',
-                                          '/var/log/firewall',
-                                          '/var/log/acpid',
-                                          '/var/log/NetworkManager',
-                                          '/var/log/mail',
-                                          '/var/log/mail.info',
-                                          '/var/log/mail.warn',
-                                          '/var/log/mail.err',
-                                          '/var/log/news/news.crit',
-                                          '/var/log/news/news.err',
-                                          '/var/log/news/news.notice',
-                                        ]
       $default_service_name           = 'syslog'
       $default_sysconfig_path         = '/etc/sysconfig/syslog'
       $default_pid_file               = '/var/run/rsyslogd.pid'
@@ -223,8 +185,18 @@ class rsyslog (
   }
 
   if $logrotate_present_real {
+    $default_logrotate_syslog_files = [
+                                        $kernel_target,
+                                        '/var/log/messages',
+                                        '/var/log/secure',
+                                        '/var/log/maillog',
+                                        '/var/log/spooler',
+                                        '/var/log/boot.log',
+                                        '/var/log/cron',
+                                      ]
+
     $logrotate_syslog_files_real = $logrotate_syslog_files ? {
-      'USE_DEFAULTS' => $default_logrotate_syslog_files,
+      'USE_DEFAULTS' => unique($default_logrotate_syslog_files),
       default        => unique($logrotate_syslog_files)
     }
     validate_array($logrotate_syslog_files_real)

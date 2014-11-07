@@ -274,8 +274,26 @@ describe 'rsyslog' do
             }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3> and <USE_DEFAULTS> as valid values and you have specified <invalid>/)
           end
         end
-     end
- end
+
+      context 'with kernel_target specified as an invalid value' do
+        let(:params) { { :kernel_target => 'var/log/messages' } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'Debian',
+            :lsbmajdistrelease => '7',
+          }
+        end
+
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error)
+        end
+      end
+    end
+
+  end
 
   describe 'rsyslog_package' do
     let :facts do
@@ -396,20 +414,20 @@ describe 'rsyslog' do
   end
 
   logrotate_hash = {
-    'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :logrotate_present => true },
-    'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :logrotate_present => true },
-    'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :logrotate_present => true },
-    'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :logrotate_present => true },
-    'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :logrotate_present => true },
-    'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :logrotate_present => true },
-    'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :logrotate_present => false },
-    'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :logrotate_present => false },
+    'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :logrotate_present => true,  :pid_file => 'rsyslogd', },
+    'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :logrotate_present => true,  :pid_file => 'syslogd', },
+    'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :logrotate_present => true,  :pid_file => 'syslogd', },
+    'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :logrotate_present => true,  :pid_file => 'rsyslogd', },
+    'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :logrotate_present => true,  :pid_file => 'rsyslogd', },
+    'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :logrotate_present => true,  :pid_file => 'rsyslogd', },
+    'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :logrotate_present => false, :pid_file => 'rsyslogd', },
+    'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :logrotate_present => false, :pid_file => 'rsyslogd', },
   }
 
-  describe 'rsyslog_logrotate_d_config' do
+  describe 'rsyslog_logrotate_d_config content' do
     logrotate_hash.sort.each do |k,v|
       if v[:logrotate_present]
-        logrotate_fixture = File.read(fixtures("#{k}.logrotate"))
+        logrotate_fixture = File.read(fixtures("logrotate.#{v[:pid_file]}"))
       end
 
       context "with default params on #{v[:osfamily]} #{v[:release]}" do
@@ -454,11 +472,25 @@ describe 'rsyslog' do
         end
       end
     end
-  end
 
-  describe 'with logrotate_syslog_files with duplicate files' do
-    context 'specified' do
+    context 'with logrotate_syslog_files containing duplicate files' do
+      logrotate_fixture = File.read(fixtures('logrotate.rsyslogd'))
+
       let(:params) { { :logrotate_syslog_files => [ '/var/log/messages', '/var/log/secure', '/var/log/maillog', '/var/log/spooler', '/var/log/boot.log', '/var/log/cron', '/var/log/cron', ]  } }
+      let :facts do
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '5',
+        }
+      end
+
+      it { should contain_file('rsyslog_logrotate_d_config').with_content(logrotate_fixture) }
+
+    end
+
+    context 'with kernel_target containing specific destination' do
+      let(:params) { { :kernel_target => '/special/kernel_target', } }
       let :facts do
         {
           :kernel            => 'Linux',
@@ -481,6 +513,7 @@ describe 'rsyslog' do
 %{# This file is being maintained by Puppet.
 # DO NOT EDIT
 
+/special/kernel_target
 /var/log/messages
 /var/log/secure
 /var/log/maillog
@@ -496,10 +529,8 @@ describe 'rsyslog' do
 })
         }
     end
-  end
 
-  describe 'with pid_file parameter' do
-    context 'specified' do
+    context 'with pid_file paramter specified as valid value' do
       let(:params) { { :pid_file => '/path/to/syslog.pid' } }
       let :facts do
         {
@@ -555,6 +586,7 @@ describe 'rsyslog' do
         }.to raise_error(Puppet::Error)
       end
     end
+
   end
 
   describe 'rsyslog_sysconfig' do
