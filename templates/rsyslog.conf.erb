@@ -14,7 +14,7 @@ $ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
 #$ModLoad immark.so	# provides --MARK-- message capability
 <% if @local_file_monitoring_enabled == 'true' -%>
 $ModLoad imfile
-<$ end -%>
+<% end -%>
 
 <% if @is_log_server == 'true' -%>
 <% if @my_enable_udp_server == 'true' -%>
