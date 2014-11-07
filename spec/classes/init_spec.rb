@@ -49,7 +49,7 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
       end
 
-      context 'local_file_monitoring_enabled='true'' do
+      context 'local_file_monitoring_enabled=true' do
         let :params do
           { :local_file_monitoring_enabled => 'true' }
         end
