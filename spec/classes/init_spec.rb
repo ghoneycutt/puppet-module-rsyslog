@@ -963,142 +963,53 @@ describe 'rsyslog' do
     end
 
   describe 'module platform support' do
-    context 'on supported osfamily, RedHat' do
-      context 'on unsupported major release 4' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'RedHat',
-            :lsbmajdistrelease => '4',
-          }
-        end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have 4/)
-        end
-      end
+    support_matrix = {
+      'redhat4'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '4',    :support => 'unsupported', },
+      'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :support => 'supported', },
+      'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :support => 'supported', },
+      'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :support => 'supported', },
+      'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :support => 'supported', },
+      'suse9'     => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '9',    :support => 'unsupported', },
+      'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :support => 'supported', },
+      'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :support => 'supported', },
+      'solaris9'  => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.9',  :support => 'unsupported', },
+      'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :support => 'supported', },
+      'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :support => 'supported', },
+    }
 
-      context 'on supported major release 5' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'RedHat',
-            :lsbmajdistrelease => '5',
-          }
+    support_matrix.sort.each do |k,v|
+      context "on osfamily #{v[:osfamily]} with major release #{v[:release]} which is #{v[:support]}" do
+        if v[:kernel] == 'Linux'
+          let :facts do
+            {
+              :kernel            => v[:kernel],
+              :osfamily          => v[:osfamily],
+              :lsbmajdistrelease => v[:release],
+            }
+          end
+        elsif v[:kernel] == 'Solaris'
+          let :facts do
+            {
+              :kernel        => v[:kernel],
+              :osfamily      => v[:osfamily],
+              :kernelrelease => v[:release],
+            }
+          end
         end
-        it { should contain_class('rsyslog') }
-      end
 
-      context 'on supported major release 6' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'RedHat',
-            :lsbmajdistrelease => '6',
-          }
+        if v[:support] == 'supported'
+          it { should contain_class('rsyslog') }
+        else
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/rsyslog supports #{v[:osfamily]} like systems with (kernel|major) release .* and .* and you have #{v[:release]}/)
+          end
         end
-        it { should contain_class('rsyslog') }
-      end
 
-      context 'on supported major release 7' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'RedHat',
-            :lsbmajdistrelease => '7',
-          }
-        end
-        it { should contain_class('rsyslog') }
       end
     end
 
-    context 'on supported osfamily, Debian' do
-      let :facts do
-        {
-          :kernel   => 'Linux',
-          :osfamily => 'Debian',
-        }
-      end
-      it { should contain_class('rsyslog') }
-    end
-
-    context 'on supported osfamily, Suse' do
-      context 'on unsupported major release 9' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'Suse',
-            :lsbmajdistrelease => '9',
-          }
-        end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports Suse like systems with major release 10 and 11, and you have 9/)
-        end
-      end
-
-      context 'on supported major release 10' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'Suse',
-            :lsbmajdistrelease => '10',
-          }
-        end
-        it { should contain_class('rsyslog') }
-      end
-
-      context 'on supported major release 11' do
-        let :facts do
-          {
-            :kernel            => 'Linux',
-            :osfamily          => 'Suse',
-            :lsbmajdistrelease => '11',
-          }
-        end
-        it { should contain_class('rsyslog') }
-      end
-    end
-
-    context 'on supported osfamily, Solaris' do
-      context 'on supported major release 10' do
-        let(:facts) do
-          {
-            :kernel        => 'SunOS',
-            :osfamily      => 'Solaris',
-            :kernelrelease => '5.10',
-          }
-        end
-        it { should contain_class('rsyslog') }
-      end
-
-      context 'on supported major release 11' do
-        let(:facts) do
-          {
-            :kernel        => 'SunOS',
-            :osfamily      => 'Solaris',
-            :kernelrelease => '5.11',
-          }
-        end
-        it { should contain_class('rsyslog') }
-      end
-
-      context 'on unsupported major release 9' do
-        let(:facts) do
-          {
-            :kernel        => 'SunOS',
-            :osfamily      => 'Solaris',
-            :kernelrelease => '5.9',
-          }
-        end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/rsyslog supports Solaris like systems with kernel release 5.10 and 5.11, and you have 5.9/)
-        end
-      end
-    end
   end
+
 end
