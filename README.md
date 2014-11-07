@@ -191,6 +191,12 @@ Mode of the log directory.
 
 - *Default*: '0750'
 
+local_file_monitoring_enabled
+-------
+Enables the 'imfile' module for local file monitoring.
+
+- *Default*: 'false'
+
 remote_template
 ---------------
 Template path to store logs from remote hosts, appended after log_dir
