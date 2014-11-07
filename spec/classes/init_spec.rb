@@ -31,10 +31,9 @@ describe 'rsyslog' do
       context 'with default params' do
         it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
         it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
-
-<<<<<<< HEAD
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
+        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imfile$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
@@ -48,24 +47,6 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerRun 514$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
-=======
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ModLoad imfile$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\*.\* @@log.defaultdomain:514/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$RuleSet remote\n\*.\*?RemoteHost$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
-        it { should_not contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
->>>>>>> Update init_spec.rb
       end
 
       context 'local_file_monitoring_enabled='true'' do
