@@ -59,8 +59,10 @@ kern.*                                                  <%= @kernel_target %>
 # The authpriv file has restricted access.
 authpriv.*                                              /var/log/secure
 
+<% if @mail_default_enable == 'true' -%>
 # Log all the mail messages in one place.
 mail.*                                                  -/var/log/maillog
+<% end -%>
 
 # Log cron stuff
 cron.*                                                  /var/log/cron

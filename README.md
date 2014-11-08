@@ -317,6 +317,12 @@ List of source facilities to be sent to remote log server. Only used if remote_l
 
 - *Default*: `*.*`
 
+mail_default_enable
+-----------------
+Log mail.* to /var/log/maillog
+
+- *Default*: true
+
 ===
 
 # rsyslog::fragment define #
