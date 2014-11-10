@@ -5,8 +5,7 @@
 <%= file %>
 <% end -%>
 {
-    sharedscripts
-    postrotate
-        /bin/kill -HUP `cat <%= @pid_file_real %> 2> /dev/null` 2> /dev/null || true
-    endscript
+<% @logrotate_options_real.each do |option| -%>
+    <%= option %>
+<% end -%>
 }

@@ -1,8 +1,13 @@
 # This file is being maintained by Puppet.
 # DO NOT EDIT
 
-/var/log/warn
 /var/log/messages
+/var/log/secure
+/var/log/maillog
+/var/log/spooler
+/var/log/boot.log
+/var/log/cron
+/var/log/warn
 /var/log/allmessages
 /var/log/localmessages
 /var/log/firewall
@@ -16,8 +21,16 @@
 /var/log/news/news.err
 /var/log/news/news.notice
 {
+    compress
+    dateext
+    maxage 365
+    rotate 99
+    missingok
+    notifempty
+    size +4096k
+    create 640 root root
     sharedscripts
     postrotate
-        /bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
+        /etc/init.d/syslog reload > /dev/null
     endscript
 }
