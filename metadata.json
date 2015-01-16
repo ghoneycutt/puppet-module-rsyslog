@@ -3,7 +3,7 @@
   "version": "0.13.0",
   "author": "ghoneycutt",
   "summary": "Manage rsyslog",
-  "license": "Apache License, Version 2.0",
+  "license": "Apache-2.0",
   "source": "git://github.com/ghoneycutt/puppet-module-rsyslog.git",
   "project_page": "https://github.com/ghoneycutt/puppet-module-rsyslog",
   "issues_url": "https://github.com/ghoneycutt/puppet-module-rsyslog/issues",
