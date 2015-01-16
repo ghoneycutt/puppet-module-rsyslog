@@ -1,6 +1,6 @@
 {
   "name": "ghoneycutt-rsyslog",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "author": "ghoneycutt",
   "summary": "Manage rsyslog",
   "license": "Apache-2.0",
@@ -8,11 +8,6 @@
   "project_page": "https://github.com/ghoneycutt/puppet-module-rsyslog",
   "issues_url": "https://github.com/ghoneycutt/puppet-module-rsyslog/issues",
   "description": "Manage rsyslog",
-  "dependencies": [
-    {"name":"ghoneycutt/sysklogd","version_requirement":">= 1.0.0"},
-    {"name":"ghoneycutt/common","version_requirement":">= 1.0.0"},
-    {"name":"puppetlabs/stdlib","version_requirement":">= 3.2.0"}
-  ],
   "requirements": [
     {
       "name": "pe",
@@ -75,5 +70,10 @@
         "11"
       ]
     }
+  ],
+  "dependencies": [
+    {"name":"ghoneycutt/sysklogd","version_requirement":">= 1.0.0"},
+    {"name":"ghoneycutt/common","version_requirement":">= 1.0.0"},
+    {"name":"puppetlabs/stdlib","version_requirement":">= 3.2.0"}
   ]
 }
