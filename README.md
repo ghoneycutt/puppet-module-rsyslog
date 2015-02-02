@@ -28,11 +28,40 @@ This module has been tested to work on the following systems with Puppet v3.x an
 
 ===
 
+# Examples
+Add the following entries to Hiera.
+
+## Using TLS such as with Papertrail
+You will likely have a specific host/port for your account.
+
+<pre>
+rsyslog::use_tls: 'true'
+rsyslog::permitted_peer: '*.papertrailapp.com'
+rsyslog::log_server: 'logs2.papertrailapp.com'
+rsyslog::log_server_port: '1234'
+rsyslog::ca_file: '/etc/papertrail-bundle.pem'
+</pre>
+
+## Centralized syslog server
+<pre>
+rsyslog::is_log_server: 'true'
+</pre>
+
+## Using rsyslog7
+<pre>
+rsyslog::package:
+  - 'rsyslog7'
+  - 'rsyslog7-gnutls'
+</pre>
+
+
+===
+
 # Parameters #
 
 package
 -------
-Name of the rsyslog package.
+Name of the rsyslog package. If use_tls is true, the default is the array `['rsyslog','rsyslog-gnutls']`.
 
 - *Default*: 'rsyslog'
 
@@ -323,6 +352,24 @@ source_facilities
 List of source facilities to be sent to remote log server. Only used if remote_logging is true.
 
 - *Default*: `*.*`
+
+use_tls
+-------
+Boolean to include directives related to using TLS.
+
+- *Default*: false
+
+ca_file
+-------
+Path to .pem for use with TLS. *Required* if use_tls is true.
+
+- *Default*: undef
+
+permitted_peer
+--------------
+Permitted peer for TLS. Value of `$ActionSendStreamDriverPermittedPeer` setting in rsyslog.conf. *Required* if use_tls is true.
+
+- *Default*: undef
 
 ===
 
