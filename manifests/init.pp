@@ -7,7 +7,7 @@
 # This module will ensure that sysklogd is absent, which is needed on EL5.
 #
 class rsyslog (
-  $package                  = 'rsyslog',
+  $package                  = 'USE_DEFAULTS',
   $package_ensure           = 'present',
   $package_provider         = undef,
   $pid_file                 = 'USE_DEFAULTS',
@@ -55,11 +55,38 @@ class rsyslog (
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
   $source_facilities        = '*.*',
+  $use_tls                  = false,
+  $ca_file                  = undef,
+  $permitted_peer           = undef,
 ) {
 
   # validation
   if $source_facilities == '' {
     fail('rsyslog::source_facilities cannot be empty!')
+  }
+
+  if is_string($use_tls) == true {
+    $use_tls_real = str2bool($use_tls)
+  } else {
+    $use_tls_real = $use_tls
+  }
+  validate_bool($use_tls_real)
+
+  if $package == 'USE_DEFAULTS' {
+    if $use_tls_real == true {
+      $package_real = [ 'rsyslog',
+                        'rsyslog-gnutls',
+                      ]
+    } else {
+      $package_real = 'rsyslog'
+    }
+  } else {
+    $package_real = $package
+  }
+
+  if $use_tls_real == true {
+    validate_absolute_path($ca_file)
+    validate_string($permitted_peer)
   }
 
   case $rsyslog_conf_version {
@@ -368,7 +395,7 @@ class rsyslog (
   }
   validate_bool($rsyslog_d_dir_purge_real)
 
-  package { $package:
+  package { $package_real:
     ensure   => $package_ensure,
     provider => $package_provider,
   }
@@ -381,7 +408,7 @@ class rsyslog (
       owner   => $rsyslog::sysconfig_owner,
       group   => $rsyslog::sysconfig_group,
       mode    => $rsyslog::sysconfig_mode,
-      require => Package[$package],
+      require => Package[$package_real],
       notify  => Service['rsyslog_daemon'],
     }
   }
@@ -394,7 +421,7 @@ class rsyslog (
       group   => $logrotate_d_config_group,
       mode    => $logrotate_d_config_mode,
       content => template('rsyslog/logrotate.erb'),
-      require => Package[$package],
+      require => Package[$package_real],
     }
   }
 
@@ -405,7 +432,7 @@ class rsyslog (
     owner   => $config_owner,
     group   => $config_group,
     mode    => $config_mode,
-    require => Package[$package],
+    require => Package[$package_real],
     notify  => Service['rsyslog_daemon'],
   }
 

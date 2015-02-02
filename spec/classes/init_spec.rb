@@ -295,6 +295,100 @@ describe 'rsyslog' do
     end
   end
 
+  describe 'with use_tls' do
+    ['false',false].each do |value|
+      context "set to #{value}" do
+        let(:params) { { :use_tls => value } }
+        let(:facts) do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'Debian',
+            :lsbmajdistrelease => '7',
+          }
+        end
+
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$DefaultNetstreamDriverCAFile/) }
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$ActionSendStreamDriver gtls/) }
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$ActionSendStreamDriverMode 1/) }
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$ActionSendStreamDriverAuthMode/) }
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$ActionSendStreamDriverPermittedPeer/) }
+      end
+    end
+
+    ['true',true].each do |value|
+      context "set to #{value}" do
+        context 'ca_file set to valid path and permitted_peer set to a valid string' do
+          let(:params) do
+            {
+              :use_tls        => value,
+              :ca_file        => '/etc/papertrail-bundle.pem',
+              :permitted_peer => '*.papertrailapp.com',
+            }
+          end
+          let(:facts) do
+            {
+              :kernel            => 'Linux',
+              :osfamily          => 'Debian',
+              :lsbmajdistrelease => '7',
+            }
+          end
+
+          it { should contain_file('rsyslog_config').with_content(/^\$DefaultNetstreamDriverCAFile \/etc\/papertrail-bundle.pem # trust these CAs$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionSendStreamDriver gtls # use gtls netstream driver$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionSendStreamDriverMode 1 # require TLS$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionSendStreamDriverAuthMode x509\/name # authenticate by hostname$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionSendStreamDriverPermittedPeer \*.papertrailapp.com$/) }
+        end
+
+        context 'ca_file set to invalid path' do
+          let(:params) do
+            {
+              :use_tls        => value,
+              :ca_file        => 'invalid/path',
+              :permitted_peer => '*.papertrailapp.com',
+            }
+          end
+          let(:facts) do
+            {
+              :kernel            => 'Linux',
+              :osfamily          => 'Debian',
+              :lsbmajdistrelease => '7',
+            }
+          end
+
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/"invalid\/path" is not an absolute path./)
+          end
+        end
+
+        context 'permitted_peer set to a non-string' do
+          let(:params) do
+            {
+              :use_tls        => value,
+              :ca_file        => '/etc/papertrail-bundle.pem',
+              :permitted_peer => ['invalid'],
+            }
+          end
+          let(:facts) do
+            {
+              :kernel            => 'Linux',
+              :osfamily          => 'Debian',
+              :lsbmajdistrelease => '7',
+            }
+          end
+
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/\["invalid"\] is not a string./)
+          end
+        end
+      end
+    end
+  end
+
   describe 'rsyslog_package' do
     let :facts do
       {
@@ -307,6 +401,27 @@ describe 'rsyslog' do
     context 'with default params' do
       it {
         should contain_package('rsyslog').with({
+          'ensure' => 'present'
+        })
+      }
+    end
+
+    context 'with default params and use_tls set to true' do
+      let(:params) do
+        {
+          :use_tls => true,
+          :ca_file => '/etc/papertrail-bundle.pem',
+        }
+      end
+
+      it {
+        should contain_package('rsyslog').with({
+          'ensure' => 'present'
+        })
+      }
+
+      it {
+        should contain_package('rsyslog-gnutls').with({
           'ensure' => 'present'
         })
       }

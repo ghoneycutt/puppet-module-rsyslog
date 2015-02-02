@@ -39,6 +39,14 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 # not useful and an extreme performance hit
 #$ActionFileEnableSync on
 <% end -%>
+<% if @use_tls_real.to_s == 'true' -%>
+
+$DefaultNetstreamDriverCAFile <%= @ca_file %> # trust these CAs
+$ActionSendStreamDriver gtls # use gtls netstream driver
+$ActionSendStreamDriverMode 1 # require TLS
+$ActionSendStreamDriverAuthMode x509/name # authenticate by hostname
+$ActionSendStreamDriverPermittedPeer <%= @permitted_peer %>
+<% end -%>
 
 #### RULES ####
 
