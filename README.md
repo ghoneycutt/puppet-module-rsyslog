@@ -23,6 +23,7 @@ This module has been tested to work on the following systems with Puppet v3.x an
  * EL 7
  * Suse 10
  * Suse 11
+ * Suse 12
  * Solaris 10
  * Solaris 11
 

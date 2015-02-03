@@ -30,7 +30,8 @@ describe 'rsyslog' do
     context 'rsyslog config content' do
       context 'with default params' do
         it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
+        it { should contain_file('rsyslog_config').with_content(/^#rsyslog v5 config file$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\*.emerg\s*:omusrmsg:\*$/) }
 
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
@@ -271,7 +272,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3> and <USE_DEFAULTS> as valid values and you have specified <invalid>/)
+          }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <invalid>/)
         end
       end
 
@@ -536,6 +537,7 @@ describe 'rsyslog' do
       'debian7'   => { :osfamily => 'Debian',  :release => '7',    :kernel => 'Linux',   },
       'suse10'    => { :osfamily => 'Suse',    :release => '10',   :kernel => 'Linux',   },
       'suse11'    => { :osfamily => 'Suse',    :release => '11',   :kernel => 'Linux',   },
+      'suse12'    => { :osfamily => 'Suse',    :release => '12',   :kernel => 'Linux',   },
       'solaris10' => { :osfamily => 'Solaris', :release => '5.10', :kernel => 'Solaris', },
       'solaris11' => { :osfamily => 'Solaris', :release => '5.11', :kernel => 'Solaris', },
     }
@@ -847,6 +849,30 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS=""$/) }
       end
     end
+
+    context 'on Suse 12' do
+      let :facts do
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'Suse',
+          :lsbmajdistrelease => '12',
+        }
+      end
+
+      context 'with default params' do
+        it {
+          should contain_file('rsyslog_sysconfig').with({
+            'path'    => '/etc/sysconfig/syslog',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'mode'    => '0644',
+            'require' => 'Package[rsyslog]',
+            'notify'  => 'Service[rsyslog_daemon]',
+          })
+        }
+        it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS=""$/) }
+      end
+    end
   end
 
   describe 'rsyslog_d_dir' do
@@ -1101,6 +1127,7 @@ describe 'rsyslog' do
       'suse9'     => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '9',    :support => 'unsupported', },
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :support => 'supported', },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :support => 'supported', },
+      'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12',   :support => 'supported', },
       'solaris9'  => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.9',  :support => 'unsupported', },
       'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :support => 'supported', },
       'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :support => 'supported', },
