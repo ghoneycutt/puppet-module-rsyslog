@@ -293,6 +293,59 @@ describe 'rsyslog' do
         end
       end
 
+      context 'with log_entries paramter specified as valid array' do
+        let :params do
+          {
+            :log_entries => [ '*.* /var/log/catchall', 'kern.* /var/log/kern.log' ],
+          }
+        end
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '6',
+          }
+        end
+
+        it {
+          should contain_file('rsyslog_config').with_content(/^\*.\* \/var\/log\/catchall\nkern.\* \/var\/log\/kern.log$/)
+        }
+
+      end
+
+      context 'with log_entries specified as an invalid value' do
+        let(:params) { { :log_entries => 'i_am_simply_not_an_array' } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'Debian',
+            :lsbmajdistrelease => '7',
+          }
+        end
+
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/is not an Array/)
+        end
+      end
+
+      context 'with emerg_target containing specific destination' do
+        let(:params) { { :emerg_target => '/special/emerg_target', } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '5',
+          }
+        end
+
+        it {
+          should contain_file('rsyslog_config').with_content(/\*.emerg\s+\/special\/emerg_target$/)
+        }
+
+      end
+
     end
   end
 
