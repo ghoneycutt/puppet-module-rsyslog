@@ -1,5 +1,6 @@
 # This file is being maintained by Puppet.
 # DO NOT EDIT
+*.info;mail.none;authpriv.none;cron.none<% if @messages_facilities -%><% messages_facilities.sort.each do |item| -%>;<%= item %><% end -%><% end -%>                /var/log/messages
 
 #rsyslog v<%= @rsyslog_conf_version_real %> config file
 
@@ -62,7 +63,7 @@ kern.*                                                  <%= @kernel_target %>
 
 # Log anything (except mail) of level info or higher.
 # Don't log private authentication messages!
-*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+#*.info;mail.none;authpriv.none;cron.none<% if @messages_facilities -%><% messages_facilities.sort.each do |item| -%>;<%= item %><% end -%><% end -%>                /var/log/messages
 
 # The authpriv file has restricted access.
 authpriv.*                                              /var/log/secure

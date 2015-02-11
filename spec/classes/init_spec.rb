@@ -73,6 +73,15 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
       end
 
+      context 'with messages_facilities set to local0.none' do
+        let :params do
+          {
+            :messages_facilities      => [ 'local0.none', ],
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^\*.+local0.none\s+\/var\/log\/messages$/) }
+      end
+
       context 'with is_log_server enabled and transport_protocol=tcp specified' do
         let :params do
           {

@@ -55,6 +55,7 @@ class rsyslog (
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
   $source_facilities        = '*.*',
+  $messages_facilities      = undef,
   $use_tls                  = false,
   $ca_file                  = undef,
   $permitted_peer           = undef,
@@ -321,6 +322,10 @@ class rsyslog (
       default        => $logrotate_options
     }
     validate_array($logrotate_options_real)
+
+    if $messages_facilities != undef {
+      validate_array($messages_facilities)
+    }
 
     $logrotate_syslog_files_real = $logrotate_syslog_files ? {
       'USE_DEFAULTS' => unique($default_logrotate_syslog_files),
