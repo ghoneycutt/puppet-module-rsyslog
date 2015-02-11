@@ -55,6 +55,11 @@ rsyslog::package:
   - 'rsyslog7-gnutls'
 </pre>
 
+## Exclude local0
+<pre>
+rsyslog::messages_facilities:
+  - local0.none
+</pre>
 
 ===
 
@@ -347,6 +352,12 @@ kernel_target
 Target of kernel logs.
 
 - *Default*: '/var/log/messages'
+
+messages_facilities
+-------------------
+Additional excludes from the messages file
+
+- *Default*: undef
 
 source_facilities
 -----------------
