@@ -232,47 +232,31 @@ describe 'rsyslog' do
         }
       end
 
-      context 'with rsyslog_conf_version=2 specified' do
-        let :params do
-          {
-            :rsyslog_conf_version => '2',
-          }
+      ['2','3','4','5','6','7','8',].each do |value|
+        context "with rsyslog_conf_version=v#{value} specified" do
+          let :params do
+            {
+              :rsyslog_conf_version => value,
+            }
+          end
+
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v#{value} config file$/) }
+
         end
-        it { should contain_file('rsyslog_config').with_content(/^#rsyslog v2 config file$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$template TraditionalFormat,\"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0\"$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$RuleSet local$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$DefaultRuleset local$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$IncludeConfig \/etc\/rsyslog.d\/*.conf$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\*.\* @@log.defaultdomain:514/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$RuleSet remote\n\*.\*?RemoteHost$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerRun 514$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
       end
 
-      context 'with rsyslog_conf_version specified as invalid value' do
-        let :params do
-          {
-            :rsyslog_conf_version => 'invalid',
-          }
-        end
-        it do
-          expect {
-            should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <invalid>/)
+      ['1','9','invalid',].each do |value|
+        context "with rsyslog_conf_version=v#{value} specified as invalid value" do
+          let :params do
+            {
+              :rsyslog_conf_version => value,
+            }
+          end
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <#{value}>/)
+          end
         end
       end
 
@@ -293,6 +277,175 @@ describe 'rsyslog' do
         end
       end
 
+      context 'with log_entries paramter specified as valid array' do
+        let :params do
+          {
+            :log_entries => [ '*.* /var/log/catchall', 'kern.* /var/log/kern.log' ],
+          }
+        end
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '6',
+          }
+        end
+
+        it {
+          should contain_file('rsyslog_config').with_content(/^\*.\* \/var\/log\/catchall\nkern.\* \/var\/log\/kern.log$/)
+        }
+
+      end
+
+      context 'with log_entries specified as an invalid value' do
+        let(:params) { { :log_entries => 'i_am_simply_not_an_array' } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'Debian',
+            :lsbmajdistrelease => '7',
+          }
+        end
+
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/is not an Array/)
+        end
+      end
+
+      context 'with emerg_target containing specific destination' do
+        let(:params) { { :emerg_target => '/special/emerg_target', } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '5',
+          }
+        end
+
+        it {
+          should contain_file('rsyslog_config').with_content(/\*.emerg\s+\/special\/emerg_target$/)
+        }
+
+      end
+
+    end
+  end
+
+  # rsyslog version specific differences in rsyslog_config
+  ['2.4.2','3.4.56','4.56.7','5.0.0','6.7.8','7','8.9',].each do |value|
+    describe "running on rsyslog v#{value}" do
+      let :facts do
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+          :rsyslog_version   => value,
+        }
+      end
+
+      context "with default params" do
+        if value.to_i >= 5
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v5 config file$/) }
+        elsif value.to_i >= 3
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
+        else value.to_i >= 2
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v2 config file$/) }
+        end
+
+        #### MODULES ####
+        if value.to_i > 2
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imuxsock.so/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imklog.so/) }
+          it { should contain_file('rsyslog_config').with_content(/^#\$ModLoad immark.so/) }
+        else
+          it { should contain_file('rsyslog_config').without_content(/\$ModLoad imuxsock.so/) }
+          it { should contain_file('rsyslog_config').without_content(/\$ModLoad imklog.so/) }
+          it { should contain_file('rsyslog_config').without_content(/\#\$ModLoad immark.so/) }
+        end
+
+        #### GLOBAL DIRECTIVES ####
+        if value.to_i == 2
+          it { should contain_file('rsyslog_config').with_content(/^\$template TraditionalFormat,\"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0\"$/) }
+        else
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat$/) }
+        end
+
+        #### RULES ####
+        if value.to_i > 2
+          it { should contain_file('rsyslog_config').with_content(/^\$RuleSet local$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$DefaultRuleset local$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$IncludeConfig \/etc\/rsyslog.d\/\*.conf$/) }
+        else
+          it { should contain_file('rsyslog_config').without_content(/^\$RuleSet local$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$DefaultRuleset local$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$IncludeConfig \/etc\/rsyslog.d\/\*.conf$/) }
+        end
+
+        if value.to_i >= 5
+          it { should contain_file('rsyslog_config').with_content(/^\*.emerg\s+:omusrmsg:\*$/) }
+        else
+          it { should contain_file('rsyslog_config').with_content(/^\*.emerg\s+\*$/) }
+        end
+
+      end
+
+      context "with is_log_server=true, enable_udp_server=true, enable_tcp_server=true" do
+        let :params do
+          {
+            :is_log_server     => 'true',
+            :enable_udp_server => 'true',
+            :enable_tcp_server => 'true',
+          }
+        end
+
+        if value.to_i > 2
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imudp.so$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$InputUDPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$UDPServerRun 514$/) }
+        else
+          it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$RuleSet remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\*.\* \?RemoteHost$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
+        end
+      end
+
+      context "with remote_logging=true" do
+        let :params do
+          {
+            :remote_logging => 'true',
+          }
+        end
+
+        if value.to_i > 2
+          it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/spool\/rsyslog/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueFileName queue/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueMaxDiskSpace 1g/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueSaveOnShutdown on/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionQueueType LinkedList/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ActionResumeRetryCount -1/) }
+        else
+          it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueMaxDiskSpace 1g/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueSaveOnShutdown on/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1/) }
+        end
+      end
     end
   end
 
