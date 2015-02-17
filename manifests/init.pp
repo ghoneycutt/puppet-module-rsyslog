@@ -115,14 +115,12 @@ class rsyslog (
     }
   }
 
-  case $emerg_target {
-    'USE_DEFAULTS': {
-      $emerg_target_real = $default_emerg_target
-    }
-    default: {
-      $emerg_target_real = $emerg_target
-    }
+  if $emerg_target == 'USE_DEFAULTS' {
+    $emerg_target_real = $default_emerg_target
+  } else {
+    $emerg_target_real = $emerg_target
   }
+  validate_string($emerg_target_real)
 
   if $rsyslog_fragments != undef {
     create_resources('rsyslog::fragment', $rsyslog_fragments)

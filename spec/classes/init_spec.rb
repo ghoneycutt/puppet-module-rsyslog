@@ -314,6 +314,24 @@ describe 'rsyslog' do
         end
       end
 
+      context 'with emerg_target set to an invalid type (non-string)' do
+        let(:params) { { :emerg_target => ['invalid','type'] } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '5',
+          }
+        end
+
+        it do
+          expect {
+            should contain_class('rsyslog')
+          }.to raise_error(Puppet::Error,/^\["invalid", "type"\] is not a string./)
+        end
+
+      end
+
       context 'with emerg_target containing specific destination' do
         let(:params) { { :emerg_target => '/special/emerg_target', } }
         let :facts do
