@@ -29,14 +29,14 @@ class rsyslog (
   $sysconfig_mode           = '0644',
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
-  $daemon_enable            = 'true',
-  $is_log_server            = 'false',
+  $daemon_enable            = true,
+  $is_log_server            = false,
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
   $log_dir_group            = 'root',
   $log_dir_mode             = '0750',
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
-  $remote_logging           = 'false',
+  $remote_logging           = false,
   $rsyslog_conf_version     = 'USE_DEFAULTS',
   $rsyslog_d_dir            = '/etc/rsyslog.d',
   $rsyslog_d_dir_owner      = 'root',
@@ -136,11 +136,13 @@ class rsyslog (
     'manual': {
       $daemon_enable_real = 'manual'
     }
+    default: {
+      fail("daemon_enable may be either true, false or 'manual' and is set to <${daemon_enable}>.")
+    }
   }
 
   validate_absolute_path($rsyslog_d_dir)
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
-  validate_re($daemon_enable_real, '^(true|false|manual)$', "daemon_enable may be either 'true', 'false' or 'manual' and is set to <${daemon_enable}>.")
   validate_absolute_path($kernel_target)
 
   case $::osfamily {
@@ -351,7 +353,7 @@ class rsyslog (
         $default_logrotate_options      = [
                                             'sharedscripts',
                                             'postrotate',
-                                            "    /bin/kill -HUP `cat $pid_file_real 2> /dev/null` 2> /dev/null || true",
+                                            "    /bin/kill -HUP `cat ${pid_file_real} 2> /dev/null` 2> /dev/null || true",
                                             'endscript',
                                           ]
       }
@@ -380,31 +382,39 @@ class rsyslog (
     default        => $sysconfig_path
   }
 
-  case $is_log_server {
+  if is_string($is_log_server) == true {
+    $is_log_server_real = str2bool($is_log_server)
+  } else {
+    $is_log_server_real = $is_log_server
+  }
+  validate_bool($is_log_server_real)
+
+  if is_string($remote_logging) == true {
+    $remote_logging_bool = str2bool($remote_logging)
+  } else {
+    $remote_logging_bool = $remote_logging
+  }
+  validate_bool($remote_logging_bool)
+
+  if $is_log_server_real == true {
     # logging servers do not log elsewhere
-    'true': {
-      $remote_logging_real = 'false'
+    $remote_logging_real = false
 
-      include common
+    include common
 
-      common::mkdir_p { $log_dir: }
+    common::mkdir_p { $log_dir: }
 
-      file { 'log_dir':
-        ensure  => directory,
-        path    => $log_dir,
-        owner   => $log_dir_owner,
-        group   => $log_dir_group,
-        mode    => $log_dir_mode,
-        require => Common::Mkdir_p[$log_dir],
-      }
+    file { 'log_dir':
+      ensure  => directory,
+      path    => $log_dir,
+      owner   => $log_dir_owner,
+      group   => $log_dir_group,
+      mode    => $log_dir_mode,
+      require => Common::Mkdir_p[$log_dir],
     }
+  } else {
     # non logging servers use the default
-    'false': {
-      $remote_logging_real = $remote_logging
-    }
-    default: {
-      fail("rsyslog::is_log_server is ${is_log_server} and must be \'true\' or \'false\'.")
-    }
+    $remote_logging_real = $remote_logging_bool
   }
 
   case $transport_protocol {
@@ -495,12 +505,13 @@ class rsyslog (
   }
 
   service { 'rsyslog_daemon':
-    ensure     => $daemon_ensure,
-    enable     => $daemon_enable_real,
-    name       => $service_name_real,
+    ensure => $daemon_ensure,
+    enable => $daemon_enable_real,
+    name   => $service_name_real,
   }
 
-  if $remote_logging == 'true' {
+  if $remote_logging_real == true {
+
     common::mkdir_p { $spool_dir: }
 
     file { 'ryslog_spool_directory':
