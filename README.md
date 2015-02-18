@@ -84,6 +84,13 @@ Path to pid file.
 
 - *Default*: based on platform
 
+log_entries
+-----------
+Array of log entry lines for the rules section. One entry per line. It would be wise to keep it in sync with $logrotate_syslog_files option.
+'USE_DEFAULTS' provides the module previous defaults values.
+
+- *Default*: 'USE_DEFAULTS'
+
 logrotate_present
 -----------------
 Enable logrotate.
@@ -347,6 +354,12 @@ kernel_target
 Target of kernel logs.
 
 - *Default*: '/var/log/messages'
+
+emerg_target
+-------------
+Target of emergency messages as string. 'USE_DEFAULTS' decides depending on actually running rsyslog version.
+
+- *Default*: 'USE_DEFAULTS'
 
 source_facilities
 -----------------

@@ -11,6 +11,7 @@ class rsyslog (
   $package_ensure           = 'present',
   $package_provider         = undef,
   $pid_file                 = 'USE_DEFAULTS',
+  $log_entries              = 'USE_DEFAULTS',
   $logrotate_options        = 'USE_DEFAULTS',
   $logrotate_present        = 'USE_DEFAULTS',
   $logrotate_d_config_path  = '/etc/logrotate.d/syslog',
@@ -54,6 +55,7 @@ class rsyslog (
   $enable_tcp_server        = undef,
   $enable_udp_server        = undef,
   $kernel_target            = '/var/log/messages',
+  $emerg_target             = 'USE_DEFAULTS',
   $source_facilities        = '*.*',
   $use_tls                  = false,
   $ca_file                  = undef,
@@ -89,23 +91,36 @@ class rsyslog (
     validate_string($permitted_peer)
   }
 
-  # Force puppet to save numbers as integers instead of strings
+  # setting default values depending on the running rsyslog version
+  # Force puppet to save numbers as integers instead of strings (0 + X)
   # https://tickets.puppetlabs.com/browse/PUP-2735
+  if (versioncmp($::rsyslog_version, 5) >= 0) {
+    $default_rsyslog_conf_version = 0 + 5
+    $default_emerg_target         = ':omusrmsg:*'
+  } elsif (versioncmp($::rsyslog_version, 3) >= 0) {
+    $default_rsyslog_conf_version = 0 + 3
+    $default_emerg_target         = '*'
+  } else {
+    $default_rsyslog_conf_version = 0 + 2
+    $default_emerg_target         = '*'
+  }
+
   case $rsyslog_conf_version {
     'USE_DEFAULTS': {
-      if (versioncmp($::rsyslog_version, 5) >= 0) {
-          $rsyslog_conf_version_real = 0 + 5
-      } elsif (versioncmp($::rsyslog_version, 3) >= 0) {
-          $rsyslog_conf_version_real = 0 + 3
-      } else {
-          $rsyslog_conf_version_real = 0 + 2
-      }
+      $rsyslog_conf_version_real = $default_rsyslog_conf_version
     }
     default: {
       validate_re($rsyslog_conf_version, '^(2)|(3)|(4)|(5)|(6)|(7)|(8)$', "rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <${rsyslog_conf_version}>.")
       $rsyslog_conf_version_real = 0 + $rsyslog_conf_version
     }
   }
+
+  if $emerg_target == 'USE_DEFAULTS' {
+    $emerg_target_real = $default_emerg_target
+  } else {
+    $emerg_target_real = $emerg_target
+  }
+  validate_string($emerg_target_real)
 
   if $rsyslog_fragments != undef {
     create_resources('rsyslog::fragment', $rsyslog_fragments)
@@ -221,6 +236,42 @@ class rsyslog (
     default        => $pid_file
   }
   validate_absolute_path($pid_file_real)
+
+  $default_log_entries = [
+    '# Log all kernel messages to the console.',
+    '# Logging much else clutters up the screen.',
+    '#kern.*                                                 /dev/console',
+    "kern.*                                                  ${kernel_target}",
+    '',
+    '# Log anything (except mail) of level info or higher.',
+    '# Don\'t log private authentication messages!',
+    '*.info;mail.none;authpriv.none;cron.none                /var/log/messages',
+    '',
+    '# The authpriv file has restricted access.',
+    'authpriv.*                                              /var/log/secure',
+    '',
+    '# Log all the mail messages in one place.',
+    'mail.*                                                  -/var/log/maillog',
+    '',
+    '# Log cron stuff',
+    'cron.*                                                  /var/log/cron',
+    '',
+    '# Everybody gets emergency messages',
+    "*.emerg                                                 ${emerg_target_real}",
+    '',
+    '# Save news errors of level crit and higher in a special file.',
+    'uucp,news.crit                                          /var/log/spooler',
+    '',
+    '# Save boot messages also to boot.log',
+    'local7.*                                                /var/log/boot.log',
+  ]
+
+  $log_entries_real = $log_entries ? {
+    'USE_DEFAULTS' => $default_log_entries,
+    default        => $log_entries
+  }
+
+  validate_array($log_entries_real)
 
   if $logrotate_present_real {
     case $::osfamily {
