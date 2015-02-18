@@ -812,6 +812,42 @@ describe 'rsyslog' do
 
     end
 
+    ['true','false',true,false,'yess','noo','invalid','-1',-1].each do |value|
+      context "with logrotate_present=#{value} specified as #{value.class}" do
+
+        let(:params) { { :logrotate_present => value, } }
+        let :facts do
+          {
+            :kernel            => 'Linux',
+            :osfamily          => 'RedHat',
+            :lsbmajdistrelease => '7',
+          }
+        end
+
+
+        if value == true or value == 'true'
+          it {
+            should contain_file('rsyslog_logrotate_d_config').with({
+              'ensure'  => 'file',
+              'path'    => '/etc/logrotate.d/syslog',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'mode'    => '0644',
+              'require' => 'Package[rsyslog]',
+            })
+          }
+        elsif value == false or value == 'false'
+          it { should_not contain_file('rsyslog_logrotate_d_config') }
+        else
+          it 'should fail' do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/str2bool\(\):/)
+          end
+        end
+      end
+    end
+
     context 'with pid_file paramter specified as valid value' do
       let(:params) { { :pid_file => '/path/to/syslog.pid' } }
       let :facts do

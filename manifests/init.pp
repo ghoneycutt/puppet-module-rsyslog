@@ -212,22 +212,12 @@ class rsyslog (
     }
   }
 
-  $logrotate_present_test = $logrotate_present ? {
-    'USE_DEFAULTS' => $default_logrotate_present,
-    default        => $logrotate_present
-  }
-
-  $logrotate_present_test_type = type($logrotate_present_test)
-
-  case $logrotate_present_test_type {
-    'string': {
-      $logrotate_present_real = str2bool($logrotate_present_test)
-    }
-    'boolean': {
-      $logrotate_present_real = $logrotate_present_test
-    }
-    default: {
-      fail("rsyslog::logrotate_present must be of type boolean or string. Detected type is <${logrotate_present_test_type}>.")
+  if is_bool($logrotate_present) == true {
+    $logrotate_present_real = $logrotate_present
+  } else {
+    $logrotate_present_real = $logrotate_present ? {
+      'USE_DEFAULTS' => $default_logrotate_present,
+      default        => str2bool($logrotate_present)
     }
   }
 
@@ -443,7 +433,7 @@ class rsyslog (
     $my_enable_udp_server = $default_enable_udp_server
   }
 
-  if type($rsyslog_d_dir_purge) == 'string' {
+  if is_string($rsyslog_d_dir_purge) == true {
     $rsyslog_d_dir_purge_real = str2bool($rsyslog_d_dir_purge)
   } else {
     $rsyslog_d_dir_purge_real = $rsyslog_d_dir_purge
