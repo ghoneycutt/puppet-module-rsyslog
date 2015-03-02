@@ -13,7 +13,7 @@ $ModLoad imuxsock.so	# provides support for local system logging (e.g. via logge
 $ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
 #$ModLoad immark.so	# provides --MARK-- message capability
 
-<% if @is_log_server == 'true' -%>
+<% if @is_log_server_real == true -%>
 <% if @my_enable_udp_server == 'true' -%>
 # Provides UDP syslog reception
 $ModLoad imudp.so
@@ -67,7 +67,7 @@ $DefaultRuleset local
 $IncludeConfig /etc/rsyslog.d/*.conf
 
 <% end -%>
-<% if @remote_logging_real == 'true' -%>
+<% if @remote_logging_real == true -%>
 <% if @rsyslog_conf_version_real > 2 -%>
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
@@ -82,7 +82,7 @@ $ActionResumeRetryCount -1    # infinite retries if host is down
 <% end -%>
 <% if @rsyslog_conf_version_real > 2 -%>
 
-<% if @is_log_server == 'true' -%>
+<% if @is_log_server_real == true -%>
 # logging from remote
 $RuleSet remote
 *.* ?RemoteHost

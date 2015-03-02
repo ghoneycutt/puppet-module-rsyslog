@@ -50,33 +50,60 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
       end
 
-      context 'with is_log_server=true' do
-        let :params do
-          { :is_log_server => 'true' }
+      [true,'true'].each do |value|
+        context "with is_log_server set to #{value}" do
+          let :params do
+            { :is_log_server => value }
+          end
+          it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\*.\* @@log.defaultdomain:514/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
         end
-        it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imtcp.so$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$RuleSet remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\*.\* \?RemoteHost$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').with_content(/^\$InputTCPServerRun 514$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\*.\* @@log.defaultdomain:514/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
-        it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+      end
+
+      [false,'false'].each do |value|
+        context "with is_log_server set to #{value}" do
+          let :params do
+            { :is_log_server => value }
+          end
+          it { should contain_file('rsyslog_config').with_content(/^kern.\*\s+\/var\/log\/messages$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$template RemoteHost, "\/srv\/logs\/%HOSTNAME%\/%\$YEAR%-%\$MONTH%-%\$DAY%.log"$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$RuleSet remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\*.\* \?RemoteHost$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputTCPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imudp.so$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\*.\* @@log.defaultdomain:514/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$InputUDPServerBindRuleset remote$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$UDPServerRun 514$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$WorkDirectory \/var\/spool\/rsyslog # where to place spool files$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueFileName queue # unique name prefix for spool files$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueMaxDiskSpace 1g # 1gb space limit \(use as much as possible\)$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueSaveOnShutdown on # save messages to disk on shutdown$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList   # run asynchronously$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1    # infinite retries if host is down$/) }
+        end
       end
 
       context 'with is_log_server enabled and transport_protocol=tcp specified' do
         let :params do
           {
-            :is_log_server      => 'true',
+            :is_log_server      => true,
             :transport_protocol => 'tcp',
           }
         end
@@ -93,7 +120,7 @@ describe 'rsyslog' do
       context 'with is_log_server enabled and transport_protocol=udp specified' do
         let :params do
           {
-            :is_log_server      => 'true',
+            :is_log_server      => true,
             :transport_protocol => 'udp',
           }
         end
@@ -110,7 +137,7 @@ describe 'rsyslog' do
       context 'with is_log_server enabled and enable_tcp_server enabled and enable_udp_server enabled' do
         let :params do
           {
-            :is_log_server     => 'true',
+            :is_log_server     => true,
             :enable_tcp_server => 'true',
             :enable_udp_server => 'true',
           }
@@ -221,7 +248,7 @@ describe 'rsyslog' do
       context 'with log_dir and remote_template set' do
         let :params do
           {
-            :is_log_server   => 'true',
+            :is_log_server   => true,
             :log_dir         => '/foo/bar',
             :remote_template => '%HOSTNAME%.log',
           }
@@ -412,7 +439,7 @@ describe 'rsyslog' do
       context "with is_log_server=true, enable_udp_server=true, enable_tcp_server=true" do
         let :params do
           {
-            :is_log_server     => 'true',
+            :is_log_server     => true,
             :enable_udp_server => 'true',
             :enable_tcp_server => 'true',
           }
@@ -691,13 +718,13 @@ describe 'rsyslog' do
 
     context 'with daemon_enable=invalid' do
       let (:params) { { :daemon_enable => 'invalid' } }
+
       it 'should fail' do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/daemon_enable may be either \'true\', \'false\' or \'manual\' and is set to <invalid>./)
+        }.to raise_error(Puppet::Error,/daemon_enable may be either true, false or \'manual\' and is set to <invalid>./)
       end
     end
-
   end
 
   describe 'rsyslog_logrotate_d_config' do
@@ -1219,7 +1246,7 @@ describe 'rsyslog' do
     end
 
     context 'case true' do
-      let(:params) { { :is_log_server => 'true' } }
+      let(:params) { { :is_log_server => true } }
       it { should contain_class('common') }
 
       it {
@@ -1237,7 +1264,7 @@ describe 'rsyslog' do
     context 'case true, log_dir set' do
       let :params do
       {
-        :is_log_server => 'true',
+        :is_log_server => true,
         :log_dir       => '/foo/bar',
         :log_dir_owner => 'nobody',
         :log_dir_group => 'staff',
@@ -1257,11 +1284,11 @@ describe 'rsyslog' do
     end
 
     context 'case default' do
-      let(:params) { { :is_log_server => 'undefined' } }
+      let(:params) { { :is_log_server => ['invalid','type'] } }
       it do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/rsyslog::is_log_server is undefined and must be \'true\' or \'false\'./)
+        }.to raise_error(Puppet::Error,/^\["invalid", "type"\] is not a boolean./)
       end
     end
   end

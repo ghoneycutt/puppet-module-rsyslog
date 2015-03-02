@@ -36,7 +36,7 @@ Add the following entries to Hiera.
 You will likely have a specific host/port for your account.
 
 <pre>
-rsyslog::use_tls: 'true'
+rsyslog::use_tls: true
 rsyslog::permitted_peer: '*.papertrailapp.com'
 rsyslog::log_server: 'logs2.papertrailapp.com'
 rsyslog::log_server_port: '1234'
@@ -45,7 +45,7 @@ rsyslog::ca_file: '/etc/papertrail-bundle.pem'
 
 ## Centralized syslog server
 <pre>
-rsyslog::is_log_server: 'true'
+rsyslog::is_log_server: true
 </pre>
 
 ## Using rsyslog7
@@ -201,15 +201,15 @@ Whether a service should be running. Valid values are 'stopped' and 'running'.
 
 daemon_enable
 -------------
-Whether a service should be enabled to start at boot. Valid values are 'true', 'false', 'manual'.
+Whether a service should be enabled to start at boot. Valid values are true, false, 'manual'.
 
-- *Default*: 'true'
+- *Default*: true
 
 is_log_server
 -------------
-Whether the system syslog service is meant to receive messages from remote hosts. Valid values are 'true' and 'false'.
+Boolean to determine if the system syslog service is meant to receive messages from remote hosts.
 
-- *Default*: 'false'
+- *Default*: false
 
 log_dir
 -------
@@ -242,10 +242,10 @@ Template path to store logs from remote hosts, appended after log_dir
 - *Default*: '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log'
 
 remote_logging
-----------------------
-Whether to send logs remotely to a centralized logging service.
+--------------
+Boolean to determine whether to send logs remotely to a centralized logging service.
 
-- *Default*: 'false'
+- *Default*: false
 
 rsyslog_conf_version
 --------------------
