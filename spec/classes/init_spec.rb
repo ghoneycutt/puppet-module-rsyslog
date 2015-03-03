@@ -994,7 +994,7 @@ describe 'rsyslog' do
           })
         }
         it {
-          should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c 4"$/)
+          should contain_file('rsyslog_sysconfig').without_content(/^SYSLOGD_OPTIONS=/)
         }
       end
     end
