@@ -410,3 +410,5 @@ rsyslog::rsyslog_fragments:
   everything:
     content: "*.* /tmp/everything"
 </pre>
+
+
