@@ -27,6 +27,7 @@ class rsyslog (
   $sysconfig_owner          = 'root',
   $sysconfig_group          = 'root',
   $sysconfig_mode           = '0644',
+  $syslogd_options          = 'USE_DEFAULTS',
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
   $daemon_enable            = true,
@@ -152,16 +153,19 @@ class rsyslog (
       $default_sysconfig_path         = '/etc/sysconfig/rsyslog'
       case $::lsbmajdistrelease {
         '5': {
-          $default_pid_file = '/var/run/rsyslogd.pid'
-          $sysconfig_erb    = 'sysconfig.rhel5.erb'
+          $default_pid_file        = '/var/run/rsyslogd.pid'
+          $sysconfig_erb           = 'sysconfig.rhel5.erb'
+          $default_syslogd_options = '-m 0'
         }
         '6': {
-          $default_pid_file = '/var/run/syslogd.pid'
-          $sysconfig_erb    = 'sysconfig.rhel6.erb'
+          $default_pid_file        = '/var/run/syslogd.pid'
+          $sysconfig_erb           = 'sysconfig.rhel6.erb'
+          $default_syslogd_options = ''
         }
         '7': {
-          $default_pid_file = '/var/run/syslogd.pid'
-          $sysconfig_erb    = 'sysconfig.rhel7.erb'
+          $default_pid_file        = '/var/run/syslogd.pid'
+          $sysconfig_erb           = 'sysconfig.rhel7.erb'
+          $default_syslogd_options = '-c 4'
         }
         default: {
           fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::lsbmajdistrelease}")
@@ -176,11 +180,13 @@ class rsyslog (
       $default_sysconfig_path         = '/etc/default/rsyslog'
       $default_pid_file               = '/var/run/rsyslogd.pid'
       $sysconfig_erb                  = 'sysconfig.debian.erb'
+      $default_syslogd_options        = '-c5'
     }
     'Suse' : {
       $default_logrotate_present      = true
       $default_service_name           = 'syslog'
       $default_sysconfig_path         = '/etc/sysconfig/syslog'
+      $default_syslogd_options        = ''
       $default_pid_file               = '/var/run/rsyslogd.pid'
       case $::lsbmajdistrelease {
         '10' : {
@@ -222,6 +228,12 @@ class rsyslog (
       default        => str2bool($logrotate_present)
     }
   }
+
+  $syslogd_options_real = $syslogd_options ? {
+    'USE_DEFAULTS' => $default_syslogd_options,
+    default        => $syslogd_options
+  }
+  validate_string($syslogd_options_real)
 
   $pid_file_real = $pid_file ? {
     'USE_DEFAULTS' => $default_pid_file,
