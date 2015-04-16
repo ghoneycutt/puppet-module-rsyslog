@@ -184,6 +184,12 @@ Mode of the rsyslog sysconfig config file.
 
 - *Default*: '0644'
 
+syslogd_options
+---------------
+String with startup options to pass to (r)syslogd.
+
+- *Default*: 'USE_DEFAULTS' based on platform
+
 daemon
 ------
 Name of the rsyslog service.
