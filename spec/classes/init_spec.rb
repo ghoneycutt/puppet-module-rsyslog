@@ -923,6 +923,23 @@ describe 'rsyslog' do
   end
 
   describe 'rsyslog_sysconfig' do
+    context 'with syslogd_options specified as invalid type' do
+      let :facts do
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '7',
+        }
+      end
+      let(:params) { { :syslogd_options => [ 'ar', 'ray' ] } }
+
+      it 'should fail' do
+        expect {
+          should contain_class('rsyslog')
+        }.to raise_error(Puppet::Error,/is not a string.  It looks to be a Array/)
+      end
+    end
+
     context 'on Debian' do
       let :facts do
         {
@@ -944,6 +961,12 @@ describe 'rsyslog' do
         }
 
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c5"$/) }
+      end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_OPTIONS="-c0"$/) }
       end
     end
 
@@ -971,6 +994,12 @@ describe 'rsyslog' do
           should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c 4"$/)
         }
       end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c0"$/) }
+      end
     end
 
     context 'on EL 6' do
@@ -994,8 +1023,14 @@ describe 'rsyslog' do
           })
         }
         it {
-          should contain_file('rsyslog_sysconfig').without_content(/^SYSLOGD_OPTIONS=/)
+          should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS=""$/)
         }
+      end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c0"$/) }
       end
     end
 
@@ -1021,6 +1056,12 @@ describe 'rsyslog' do
         }
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/) }
+      end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c0"$/) }
       end
     end
 
@@ -1050,6 +1091,12 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_DAEMON="rsyslogd"$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_CREATE_CONFIG="yes"$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOG_NG_PARAMS=""$/) }
+      end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_PARAMS="-c0"$/) }
       end
     end
 
@@ -1082,6 +1129,12 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_COMPAT_VERSION=""$/) }
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS=""$/) }
       end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_PARAMS="-c0"$/) }
+      end
     end
 
     context 'on Suse 12' do
@@ -1105,6 +1158,12 @@ describe 'rsyslog' do
           })
         }
         it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS=""$/) }
+      end
+
+      context 'with syslogd_options specified as valid value' do
+        let(:params) { { :syslogd_options => '-c0' } }
+
+        it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS="-c0"$/) }
       end
     end
   end
