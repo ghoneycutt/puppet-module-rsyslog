@@ -442,6 +442,8 @@ describe 'rsyslog' do
       context "with default params" do
         if value.to_i >= 5
           it { should contain_file('rsyslog_config').with_content(/^#rsyslog v5 config file$/) }
+        elsif value.to_i >= 4
+          it { should contain_file('rsyslog_config').with_content(/^#rsyslog v4 config file$/) }
         elsif value.to_i >= 3
           it { should contain_file('rsyslog_config').with_content(/^#rsyslog v3 config file$/) }
         else value.to_i >= 2
@@ -470,10 +472,14 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').with_content(/^\$DirCreateMode 0700$/) }
 
         #### RULES ####
-        if value.to_i > 2
+        if value.to_i > 3
           it { should contain_file('rsyslog_config').with_content(/^\$RuleSet local$/) }
           it { should contain_file('rsyslog_config').with_content(/^\$DefaultRuleset local$/) }
           it { should contain_file('rsyslog_config').with_content(/^\$IncludeConfig \/etc\/rsyslog.d\/\*.conf$/) }
+        elsif value.to_i > 2
+          it { should contain_file('rsyslog_config').with_content(/^\$IncludeConfig \/etc\/rsyslog.d\/\*.conf$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$RuleSet local$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$DefaultRuleset local$/) }
         else
           it { should contain_file('rsyslog_config').without_content(/^\$RuleSet local$/) }
           it { should contain_file('rsyslog_config').without_content(/^\$DefaultRuleset local$/) }

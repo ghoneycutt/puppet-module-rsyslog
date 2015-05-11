@@ -257,7 +257,7 @@ Boolean to determine whether to send logs remotely to a centralized logging serv
 
 rsyslog_conf_version
 --------------------
-Format version of rsyslog.conf file format. Supported are version 2 (clients only) and 3. 'USE_DEFAULTS' will choose the version based on the installed package version. Valid values are '2' '3' and 'USE_DEFAULTS'.
+Format version of rsyslog.conf file format. Supported are version 2 (clients only), 3, 4 and 5. 'USE_DEFAULTS' will choose the version based on the installed package version.
 
 - *Default*: 'USE_DEFAULTS'
 

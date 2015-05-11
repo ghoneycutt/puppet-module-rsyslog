@@ -112,6 +112,9 @@ class rsyslog (
   if (versioncmp($::rsyslog_version, '5') >= 0) {
     $default_rsyslog_conf_version = 0 + 5
     $default_emerg_target         = ':omusrmsg:*'
+  } elsif (versioncmp($::rsyslog_version, '4') >= 0) {
+    $default_rsyslog_conf_version = 0 + 4
+    $default_emerg_target         = '*'
   } elsif (versioncmp($::rsyslog_version, '3') >= 0) {
     $default_rsyslog_conf_version = 0 + 3
     $default_emerg_target         = '*'
