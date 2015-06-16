@@ -61,6 +61,9 @@ class rsyslog (
   $use_tls                  = false,
   $ca_file                  = undef,
   $permitted_peer           = undef,
+  $umask                    = '0000',
+  $file_create_mode         = '0644',
+  $dir_create_mode          = '0750',
 ) {
 
   # validation
