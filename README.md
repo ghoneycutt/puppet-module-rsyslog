@@ -391,6 +391,24 @@ Permitted peer for TLS. Value of `$ActionSendStreamDriverPermittedPeer` setting 
 
 - *Default*: undef
 
+umask
+--------------
+The rsyslogd processes' umask. If not specified, the system-provided default is used. The value given must always be a 4-digit octal number, with the initial digit being zero.
+
+- *Default*: undef
+
+file_create_mode
+--------------
+The creation mode with which rsyslogd creates new files. The value given must always be a 4-digit octal number, with the initial digit being zero.
+
+- *Default*: '0644'
+
+dir_create_mode
+--------------
+The creation mode with which rsyslogd creates new directories.
+
+- *Default*: '0700'
+
 ===
 
 # rsyslog::fragment define #
