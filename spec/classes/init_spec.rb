@@ -375,6 +375,36 @@ describe 'rsyslog' do
 
       end
 
+      ['umask', 'file_create_mode'].each do |modeparam|
+        ['1000','8800',].each do |value|
+          context "with #{modeparam}=#{value} specified as invalid value" do
+            let :params do
+              {
+                modeparam.to_sym => value,
+              }
+            end
+            it do
+              expect {
+                should contain_class('rsyslog')
+              }.to raise_error(Puppet::Error,/^rsyslog::#{modeparam} is <#{value}> and must be a valid four digit mode in octal notation with a leading zero\./)
+            end
+          end
+        end
+      end
+      ['1900','0800',].each do |value|
+        context "with dir_create_mode=#{value} specified as invalid value" do
+          let :params do
+            {
+              :dir_create_mode => value,
+            }
+          end
+          it do
+            expect {
+              should contain_class('rsyslog')
+            }.to raise_error(Puppet::Error,/^rsyslog::dir_create_mode is <#{value}> and must be a valid four digit mode in octal notation\./)
+          end
+        end
+      end
     end
   end
 
@@ -416,6 +446,9 @@ describe 'rsyslog' do
         else
           it { should contain_file('rsyslog_config').with_content(/^\$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat$/) }
         end
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$umask/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$FileCreateMode 0644$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$DirCreateMode 0700$/) }
 
         #### RULES ####
         if value.to_i > 2
@@ -433,7 +466,6 @@ describe 'rsyslog' do
         else
           it { should contain_file('rsyslog_config').with_content(/^\*.emerg\s+\*$/) }
         end
-
       end
 
       context "with is_log_server=true, enable_udp_server=true, enable_tcp_server=true" do
@@ -490,6 +522,33 @@ describe 'rsyslog' do
           it { should contain_file('rsyslog_config').without_content(/^\$ActionQueueType LinkedList/) }
           it { should contain_file('rsyslog_config').without_content(/^\$ActionResumeRetryCount -1/) }
         end
+      end
+
+      context 'with explicit umask=\'0022\'' do
+        let :params do
+          {
+            :umask => '0022',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^\$umask 0022$/) }
+      end
+
+      context 'with file_create_mode=\'0664\'' do
+        let :params do
+          {
+            :file_create_mode=> '0644',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^\$FileCreateMode 0644$/) }
+      end
+
+      context 'with dir_create_mode=\'0770\'' do
+        let :params do
+          {
+            :dir_create_mode=> '0770',
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^\$DirCreateMode 0770$/) }
       end
     end
   end
