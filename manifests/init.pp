@@ -409,12 +409,12 @@ class rsyslog (
   } else {
     $remote_logging_bool = $remote_logging
   }
+
   validate_bool($remote_logging_bool)
 
-  if $is_log_server_real == true {
-    # logging servers do not log elsewhere
-    $remote_logging_real = false
+  $remote_logging_real = $remote_logging_bool
 
+  if $is_log_server_real == true {
     include common
 
     common::mkdir_p { $log_dir: }
@@ -427,9 +427,6 @@ class rsyslog (
       mode    => $log_dir_mode,
       require => Common::Mkdir_p[$log_dir],
     }
-  } else {
-    # non logging servers use the default
-    $remote_logging_real = $remote_logging_bool
   }
 
   case $transport_protocol {
