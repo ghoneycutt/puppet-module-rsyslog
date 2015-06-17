@@ -48,6 +48,12 @@ $ActionSendStreamDriverAuthMode x509/name # authenticate by hostname
 $ActionSendStreamDriverPermittedPeer <%= @permitted_peer %>
 <% end -%>
 
+# File permissions
+
+$umask <%= @umask %>
+$FileCreateMode <%= @file_create_mode %>
+$DirCreateMode <%= @dir_create_mode %>
+
 #### RULES ####
 
 <% if @rsyslog_conf_version_real > 2 -%>
