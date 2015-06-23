@@ -50,9 +50,9 @@ $ActionSendStreamDriverPermittedPeer <%= @permitted_peer %>
 
 # File permissions
 
-<% if @umask %>
+<% if @umask -%>
 $umask <%= @umask %>
-<% end %>
+<% end -%>
 
 $FileCreateMode <%= @file_create_mode %>
 $DirCreateMode <%= @dir_create_mode %>

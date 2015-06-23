@@ -446,7 +446,7 @@ describe 'rsyslog' do
         else
           it { should contain_file('rsyslog_config').with_content(/^\$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat$/) }
         end
-        it { should contain_file('rsyslog_config').without_content(/^\$umask/) }
+        it { should contain_file('rsyslog_config').without_content(/^\s*\$umask/) }
         it { should contain_file('rsyslog_config').with_content(/^\$FileCreateMode 0644$/) }
         it { should contain_file('rsyslog_config').with_content(/^\$DirCreateMode 0700$/) }
 
