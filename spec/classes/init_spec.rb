@@ -722,7 +722,7 @@ describe 'rsyslog' do
       it 'should fail' do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/daemon_enable may be either true, false or \'manual\' and is set to <invalid>./)
+        }.to raise_error(Puppet::Error,/Unknown type of boolean/)
       end
     end
   end

@@ -127,12 +127,18 @@ class rsyslog (
     create_resources('rsyslog::fragment', $rsyslog_fragments)
   }
 
-  case $daemon_enable {
-    'true',true: {
-      $daemon_enable_real = 'true'
+  if is_string($daemon_enable) == true and $daemon_enable != 'manual' {
+    $daemon_enable_almostreal = str2bool($daemon_enable)
+  } else {
+    $daemon_enable_almostreal = $daemon_enable
+  }
+
+  case $daemon_enable_almostreal {
+    true: {
+      $daemon_enable_real = true
     }
-    'false',false: {
-      $daemon_enable_real = 'false'
+    false: {
+      $daemon_enable_real = false
     }
     'manual': {
       $daemon_enable_real = 'manual'
@@ -431,25 +437,25 @@ class rsyslog (
 
   case $transport_protocol {
     'tcp': {
-      $default_enable_tcp_server = 'true'
-      $default_enable_udp_server = 'false'
+      $default_enable_tcp_server = true
+      $default_enable_udp_server = false
     }
     'udp': {
-      $default_enable_tcp_server = 'false'
-      $default_enable_udp_server = 'true'
+      $default_enable_tcp_server = false
+      $default_enable_udp_server = true
     }
     default: {
       fail("rsyslog::transport_protocol is ${transport_protocol} and must be \'tcp\' or \'udp\'.")
     }
   }
 
-  if $enable_tcp_server {
+  if $enable_tcp_server != undef {
     $my_enable_tcp_server = $enable_tcp_server
   } else {
     $my_enable_tcp_server = $default_enable_tcp_server
   }
 
-  if $enable_udp_server {
+  if $enable_udp_server != undef {
     $my_enable_udp_server = $enable_udp_server
   } else {
     $my_enable_udp_server = $default_enable_udp_server
