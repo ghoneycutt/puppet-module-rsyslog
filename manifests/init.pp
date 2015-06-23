@@ -127,12 +127,18 @@ class rsyslog (
     create_resources('rsyslog::fragment', $rsyslog_fragments)
   }
 
-  case $daemon_enable {
-    'true',true: {
-      $daemon_enable_real = 'true'
+  if is_string($daemon_enable) == true and $daemon_enable != 'manual' {
+    $daemon_enable_almostreal = str2bool($daemon_enable)
+  } else {
+    $daemon_enable_almostreal = $daemon_enable
+  }
+
+  case $daemon_enable_almostreal {
+    true: {
+      $daemon_enable_real = true
     }
-    'false',false: {
-      $daemon_enable_real = 'false'
+    false: {
+      $daemon_enable_real = false
     }
     'manual': {
       $daemon_enable_real = 'manual'
