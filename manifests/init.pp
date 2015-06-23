@@ -437,25 +437,25 @@ class rsyslog (
 
   case $transport_protocol {
     'tcp': {
-      $default_enable_tcp_server = 'true'
-      $default_enable_udp_server = 'false'
+      $default_enable_tcp_server = true
+      $default_enable_udp_server = false
     }
     'udp': {
-      $default_enable_tcp_server = 'false'
-      $default_enable_udp_server = 'true'
+      $default_enable_tcp_server = false
+      $default_enable_udp_server = true
     }
     default: {
       fail("rsyslog::transport_protocol is ${transport_protocol} and must be \'tcp\' or \'udp\'.")
     }
   }
 
-  if $enable_tcp_server {
+  if $enable_tcp_server != undef {
     $my_enable_tcp_server = $enable_tcp_server
   } else {
     $my_enable_tcp_server = $default_enable_tcp_server
   }
 
-  if $enable_udp_server {
+  if $enable_udp_server != undef {
     $my_enable_udp_server = $enable_udp_server
   } else {
     $my_enable_udp_server = $default_enable_udp_server
