@@ -61,6 +61,9 @@ class rsyslog (
   $use_tls                  = false,
   $ca_file                  = undef,
   $permitted_peer           = undef,
+  $umask                    = undef,
+  $file_create_mode         = '0644',
+  $dir_create_mode          = '0700',
 ) {
 
   # validation
@@ -91,6 +94,17 @@ class rsyslog (
     validate_absolute_path($ca_file)
     validate_string($permitted_peer)
   }
+
+  if $umask {
+    validate_re($umask, '^0[0-7]{3}$',
+      "rsyslog::umask is <${umask}> and must be a valid four digit mode in octal notation with a leading zero.")
+  }
+
+  validate_re($file_create_mode, '^0[0-7]{3}$',
+    "rsyslog::file_create_mode is <${file_create_mode}> and must be a valid four digit mode in octal notation with a leading zero.")
+
+  validate_re($dir_create_mode, '^[0-7]{4}$',
+    "rsyslog::dir_create_mode is <${dir_create_mode}> and must be a valid four digit mode in octal notation.")
 
   # setting default values depending on the running rsyslog version
   # Force puppet to save numbers as integers instead of strings (0 + X)
