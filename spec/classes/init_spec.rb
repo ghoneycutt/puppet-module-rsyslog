@@ -241,7 +241,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/\"string\" is not an Array.  It looks to be a String/)
+          }.to raise_error(Puppet::Error,/\"string\" is not an Array\.  It looks to be a String/)
         end
       end
 
@@ -282,7 +282,7 @@ describe 'rsyslog' do
           it do
             expect {
               should contain_class('rsyslog')
-            }.to raise_error(Puppet::Error,/^rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <#{value}>/)
+            }.to raise_error(Puppet::Error,/rsyslog_conf_version only knows <2>, <3>, <4>, <5>, <6>, <7>, <8> and <USE_DEFAULTS> as valid values and you have specified <#{value}>/)
           end
         end
       end
@@ -354,7 +354,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error,/^\["invalid", "type"\] is not a string./)
+          }.to raise_error(Puppet::Error,/\["invalid", "type"\] is not a string\./)
         end
 
       end
@@ -386,7 +386,7 @@ describe 'rsyslog' do
             it do
               expect {
                 should contain_class('rsyslog')
-              }.to raise_error(Puppet::Error,/^rsyslog::#{modeparam} is <#{value}> and must be a valid four digit mode in octal notation with a leading zero\./)
+              }.to raise_error(Puppet::Error,/rsyslog::#{modeparam} is <#{value}> and must be a valid four digit mode in octal notation with a leading zero\./)
             end
           end
         end
@@ -401,7 +401,7 @@ describe 'rsyslog' do
           it do
             expect {
               should contain_class('rsyslog')
-            }.to raise_error(Puppet::Error,/^rsyslog::dir_create_mode is <#{value}> and must be a valid four digit mode in octal notation\./)
+            }.to raise_error(Puppet::Error,/rsyslog::dir_create_mode is <#{value}> and must be a valid four digit mode in octal notation\./)
           end
         end
       end
@@ -617,7 +617,7 @@ describe 'rsyslog' do
           it do
             expect {
               should contain_class('rsyslog')
-            }.to raise_error(Puppet::Error,/"invalid\/path" is not an absolute path./)
+            }.to raise_error(Puppet::Error,/"invalid\/path" is not an absolute path\./)
           end
         end
 
@@ -640,7 +640,7 @@ describe 'rsyslog' do
           it do
             expect {
               should contain_class('rsyslog')
-            }.to raise_error(Puppet::Error,/\["invalid"\] is not a string./)
+            }.to raise_error(Puppet::Error,/\["invalid"\] is not a string\./)
           end
         end
       end
@@ -758,7 +758,7 @@ describe 'rsyslog' do
       it 'should fail' do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/daemon_ensure may be either \'running\' or \'stopped\' and is set to <invalid>./)
+        }.to raise_error(Puppet::Error,/daemon_ensure may be either \'running\' or \'stopped\' and is set to <invalid>\./)
       end
     end
 
@@ -995,7 +995,7 @@ describe 'rsyslog' do
       it 'should fail' do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/is not a string.  It looks to be a Array/)
+        }.to raise_error(Puppet::Error,/is not a string\./)
       end
     end
 
@@ -1406,7 +1406,7 @@ describe 'rsyslog' do
       it do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error,/^\["invalid", "type"\] is not a boolean./)
+        }.to raise_error(Puppet::Error,/\["invalid", "type"\] is not a boolean\./)
       end
     end
   end
