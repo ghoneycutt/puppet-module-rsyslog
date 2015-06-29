@@ -109,10 +109,10 @@ class rsyslog (
   # setting default values depending on the running rsyslog version
   # Force puppet to save numbers as integers instead of strings (0 + X)
   # https://tickets.puppetlabs.com/browse/PUP-2735
-  if (versioncmp($::rsyslog_version, 5) >= 0) {
+  if (versioncmp($::rsyslog_version, '5') >= 0) {
     $default_rsyslog_conf_version = 0 + 5
     $default_emerg_target         = ':omusrmsg:*'
-  } elsif (versioncmp($::rsyslog_version, 3) >= 0) {
+  } elsif (versioncmp($::rsyslog_version, '3') >= 0) {
     $default_rsyslog_conf_version = 0 + 3
     $default_emerg_target         = '*'
   } else {
