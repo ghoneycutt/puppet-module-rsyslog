@@ -512,15 +512,17 @@ class rsyslog (
     }
   }
 
-  file { 'rsyslog_config':
-    ensure  => file,
-    content => template('rsyslog/rsyslog.conf.erb'),
-    path    => $config_path,
-    owner   => $config_owner,
-    group   => $config_group,
-    mode    => $config_mode,
-    require => Package[$package_real],
-    notify  => Service['rsyslog_daemon'],
+  if $::rsyslog_version {
+    file { 'rsyslog_config':
+      ensure  => file,
+      content => template('rsyslog/rsyslog.conf.erb'),
+      path    => $config_path,
+      owner   => $config_owner,
+      group   => $config_group,
+      mode    => $config_mode,
+      require => Package[$package_real],
+      notify  => Service['rsyslog_daemon'],
+    }
   }
 
   common::mkdir_p { $rsyslog_d_dir: }
