@@ -63,12 +63,6 @@ $DirCreateMode <%= @dir_create_mode %>
 # Local Logging
 $RuleSet local
 
-<% end -%>
-<% @log_entries_real.each do |log_entry| -%>
-<%= log_entry %>
-<% end -%>
-
-<% if @rsyslog_conf_version_real > 3 -%>
 # use the local RuleSet as default if not specified otherwise
 $DefaultRuleset local
 <% end -%>
@@ -76,8 +70,12 @@ $DefaultRuleset local
 <% if @rsyslog_conf_version_real > 2 -%>
 # Include all config files in /etc/rsyslog.d/
 $IncludeConfig /etc/rsyslog.d/*.conf
-
 <% end -%>
+
+<% @log_entries_real.each do |log_entry| -%>
+<%= log_entry %>
+<% end -%>
+
 <% if @remote_logging_real.to_s == 'true' -%>
 <% if @rsyslog_conf_version_real > 2 -%>
 # An on-disk queue is created for this action. If the remote host is
