@@ -315,6 +315,7 @@ describe 'rsyslog' do
             :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '6',
+            :rsyslog_version   => '5.8.10',
           }
         end
 
@@ -331,6 +332,7 @@ describe 'rsyslog' do
             :kernel            => 'Linux',
             :osfamily          => 'Debian',
             :lsbmajdistrelease => '7',
+            :rsyslog_version   => '7.4.7',
           }
         end
 
@@ -348,6 +350,7 @@ describe 'rsyslog' do
             :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '5',
+            :rsyslog_version   => '3.22.1',
           }
         end
 
@@ -366,6 +369,7 @@ describe 'rsyslog' do
             :kernel            => 'Linux',
             :osfamily          => 'RedHat',
             :lsbmajdistrelease => '5',
+            :rsyslog_version   => '3.22.1',
           }
         end
 
@@ -405,6 +409,21 @@ describe 'rsyslog' do
           end
         end
       end
+    end
+
+    context 'with fact rsyslog_version empty' do
+      let :facts do
+        {
+          :kernel            => 'Linux',
+          :osfamily          => 'RedHat',
+          :lsbmajdistrelease => '6',
+          :domain            => 'defaultdomain',
+        }
+      end
+
+      it {
+        should_not contain_file('rsyslog_config')
+      }
     end
   end
 
@@ -562,6 +581,7 @@ describe 'rsyslog' do
             :kernel            => 'Linux',
             :osfamily          => 'Debian',
             :lsbmajdistrelease => '7',
+            :rsyslog_version   => '5.8.11',
           }
         end
 
@@ -588,6 +608,7 @@ describe 'rsyslog' do
               :kernel            => 'Linux',
               :osfamily          => 'Debian',
               :lsbmajdistrelease => '7',
+              :rsyslog_version   => '5.8.11',
             }
           end
 
