@@ -59,7 +59,7 @@ $DirCreateMode <%= @dir_create_mode %>
 
 #### RULES ####
 
-<% if @rsyslog_conf_version_real > 2 -%>
+<% if @rsyslog_conf_version_real > 3 -%>
 # Local Logging
 $RuleSet local
 
@@ -68,10 +68,12 @@ $RuleSet local
 <%= log_entry %>
 <% end -%>
 
-<% if @rsyslog_conf_version_real > 2 -%>
+<% if @rsyslog_conf_version_real > 3 -%>
 # use the local RuleSet as default if not specified otherwise
 $DefaultRuleset local
+<% end -%>
 
+<% if @rsyslog_conf_version_real > 2 -%>
 # Include all config files in /etc/rsyslog.d/
 $IncludeConfig /etc/rsyslog.d/*.conf
 
