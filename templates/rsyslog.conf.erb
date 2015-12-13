@@ -87,7 +87,9 @@ $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
 <% end -%>
-<%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= @log_server -%>:<%= @log_server_port %>
+<% for server in @log_server -%>
+<%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= server -%>:<%= @log_server_port %>
+<% end -%>
 <% end -%>
 <% if @rsyslog_conf_version_real > 2 -%>
 
