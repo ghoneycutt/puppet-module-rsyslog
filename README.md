@@ -335,7 +335,18 @@ Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
 
 log_server
 ----------
-Server to send logs to if remote_logging is true.
+String or array of server to send logs to if remote_logging is true.
+
+*Example:*
+<pre>
+rsyslog::log_server: 'log'
+</pre>
+_OR_
+<pre>
+rsyslog::log_server:
+  - 'log1'
+  - 'log2'
+</pre>
 
 - *Default*: "log.${::domain}"
 
