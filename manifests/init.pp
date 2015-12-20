@@ -174,24 +174,24 @@ class rsyslog (
       $default_logrotate_present      = true
       $default_service_name           = 'rsyslog'
       $default_sysconfig_path         = '/etc/sysconfig/rsyslog'
-      case $::lsbmajdistrelease {
-        '5': {
+      case $::operatingsystemrelease {
+        /^5\.*/: {
           $default_pid_file        = '/var/run/rsyslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel5.erb'
           $default_syslogd_options = '-m 0'
         }
-        '6': {
+        /^6\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel6.erb'
           $default_syslogd_options = ''
         }
-        '7': {
+        /^7\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel7.erb'
           $default_syslogd_options = '-c 4'
         }
         default: {
-          fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::lsbmajdistrelease}")
+          fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::operatingsystemrelease}")
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
@@ -211,18 +211,18 @@ class rsyslog (
       $default_sysconfig_path         = '/etc/sysconfig/syslog'
       $default_syslogd_options        = ''
       $default_pid_file               = '/var/run/rsyslogd.pid'
-      case $::lsbmajdistrelease {
-        '10' : {
+      case $::operatingsystemrelease {
+        /^10\.*/ : {
           $sysconfig_erb = 'sysconfig.suse10.erb'
         }
-        '11' : {
+        /^11\.*/ : {
           $sysconfig_erb = 'sysconfig.suse11.erb'
         }
-        '12' : {
+        /^12\.*/ : {
           $sysconfig_erb = 'sysconfig.suse12.erb'
         }
         default: {
-          fail("rsyslog supports Suse like systems with major release 10 and 11, and you have ${::lsbmajdistrelease}")
+          fail("rsyslog supports Suse like systems with major release 10 and 11, and you have ${::operatingsystemrelease}")
         }
       }
     }

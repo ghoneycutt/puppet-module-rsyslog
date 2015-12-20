@@ -1,19 +1,19 @@
 require 'spec_helper'
 describe 'rsyslog::fragment' do
+  let(:title) { 'example' }
+  let(:facts) {
+    {
+      :kernel                 => 'Linux',
+      :osfamily               => 'RedHat',
+      :operatingsystemrelease => '6.5',
+    }
+  }
 
   context 'create file from content' do
-    let(:title) { 'example' }
     let(:params) {
       { :content => '# ### begin forwarding rule ###
 # Example rule
 # ### end of the forwarding rule ###'
-      }
-    }
-    let(:facts) {
-      {
-        :kernel            => 'Linux',
-        :osfamily          => 'RedHat',
-        :lsbmajdistrelease => '5',
       }
     }
 
@@ -35,14 +35,6 @@ describe 'rsyslog::fragment' do
   end
 
   context 'with content specified as invalid string' do
-    let(:title) { 'example' }
-    let(:facts) {
-      {
-        :kernel            => 'Linux',
-        :osfamily          => 'RedHat',
-        :lsbmajdistrelease => '6',
-      }
-    }
     let(:params) { { :content => true } }
 
     it 'should fail' do
@@ -53,14 +45,6 @@ describe 'rsyslog::fragment' do
   end
 
   context 'with ensure specified as absent' do
-    let(:title) { 'example' }
-    let(:facts) {
-      {
-        :kernel            => 'Linux',
-        :osfamily          => 'RedHat',
-        :lsbmajdistrelease => '6',
-      }
-    }
     let(:params) { { :ensure => 'absent' } }
 
     it { should contain_class('rsyslog') }
@@ -78,14 +62,6 @@ describe 'rsyslog::fragment' do
 
   ['true',true,'present'].each do |value|
     context "with ensure specified as invalid value (#{value})" do
-      let(:title) { 'example' }
-      let(:facts) {
-        {
-          :kernel            => 'Linux',
-          :osfamily          => 'RedHat',
-          :lsbmajdistrelease => '6',
-        }
-      }
       let(:params) { { :ensure => value } }
 
       it 'should fail' do
