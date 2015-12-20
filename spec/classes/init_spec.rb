@@ -224,6 +224,26 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp.so$/) }
       end
 
+      ['logserver', %w(logserver1 logserver2)].each do |values|
+        context "with remote_logging enabled and log_server=#{values} (as #{values.class})" do
+          let :params do
+            {
+              :remote_logging => true,
+              :log_server     => values,
+            }
+          end
+
+          if values.class == Array
+            values.each do |value|
+              it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@#{value}:514$/) }
+            end
+          else
+            it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@logserver:514$/) }
+          end
+
+        end
+      end
+
       context 'with source_facilities set to an empty string' do
         let :params do
           { :source_facilities => '' }
@@ -1327,4 +1347,53 @@ describe 'rsyslog' do
     end
 
   end
+
+  describe 'variable type and content validations' do
+    # set needed custom facts and variables
+    let :facts do
+      {
+        :kernel                 => 'Linux',
+        :osfamily               => 'RedHat',
+        :operatingsystemrelease => '6.5',
+        :domain                 => 'defaultdomain',
+        :rsyslog_version        => '5.8.10',
+      }
+    end
+    let(:validation_params) do
+      {
+        #:param => 'value',
+      }
+    end
+
+    validations = {
+      'array/string' => {
+        :name    => %w(log_server),
+        :valid   => [%w(ar ray), 'string'],
+        :invalid => [{ 'ha' => 'sh' }, 3, 2.42, true, false],
+        :message => 'must be an array or string',
+      },
+    }
+
+    validations.sort.each do |type, var|
+      var[:name].each do |var_name|
+        var[:valid].each do |valid|
+          context "with #{var_name} (#{type}) set to valid #{valid} (as #{valid.class})" do
+            let(:params) { validation_params.merge({ :"#{var_name}" => valid, }) }
+            it { should compile }
+          end
+        end
+
+        var[:invalid].each do |invalid|
+          context "with #{var_name} (#{type}) set to invalid #{invalid} (as #{invalid.class})" do
+            let(:params) { validation_params.merge({ :"#{var_name}" => invalid, }) }
+            it 'should fail' do
+              expect do
+                should contain_class(subject)
+              end.to raise_error(Puppet::Error, /#{var[:message]}/)
+            end
+          end
+        end
+      end # var[:name].each
+    end # validations.sort.each
+  end # describe 'variable type and content validations'
 end

@@ -424,6 +424,19 @@ class rsyslog (
   }
   validate_bool($is_log_server_real)
 
+  case type3x($log_server) {
+    'array': {
+      $log_server_real = $log_server
+    }
+    'string': {
+      $log_server_real = any2array($log_server)
+    }
+    default: {
+      fail('rsyslog::log_server must be an array or string.')
+    }
+  }
+  validate_array($log_server_real)
+
   if is_string($remote_logging) == true {
     $remote_logging_bool = str2bool($remote_logging)
   } else {
