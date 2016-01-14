@@ -64,6 +64,8 @@ class rsyslog (
   $umask                    = undef,
   $file_create_mode         = '0644',
   $dir_create_mode          = '0700',
+  $working_directory        = '/var/lib/rsyslog',
+  $journalstate_file        = 'imjournal.state',
 ) {
 
   # validation
@@ -168,6 +170,7 @@ class rsyslog (
   validate_absolute_path($rsyslog_d_dir)
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
   validate_absolute_path($kernel_target)
+  validate_absolute_path($working_directory)
 
   case $::osfamily {
     'RedHat': {
