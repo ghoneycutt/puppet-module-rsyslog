@@ -34,7 +34,7 @@ $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 
 <% if @mod_imjournal.to_s == 'true' -%>
 # Where to place auxilliary files
-$WorkDirectory <%= @working_directory %>
+$WorkDirectory <%= @work_directory %>
 <% end -%>
 
 # Use default timestamp format
