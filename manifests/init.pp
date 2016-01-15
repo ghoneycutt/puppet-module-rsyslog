@@ -171,6 +171,7 @@ class rsyslog (
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
   validate_absolute_path($kernel_target)
   validate_absolute_path($work_directory)
+  validate_string($journalstate_file)
 
   case $::osfamily {
     'RedHat': {
