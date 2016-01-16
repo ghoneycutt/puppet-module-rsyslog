@@ -189,7 +189,7 @@ class rsyslog (
         /^6\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel6.erb'
-          $default_syslogd_options = ''
+          $default_syslogd_options = undef
           $default_mod_imjournal   = false
         }
         /^7\.*/: {
@@ -218,7 +218,7 @@ class rsyslog (
       $default_logrotate_present = true
       $default_service_name      = 'syslog'
       $default_sysconfig_path    = '/etc/sysconfig/syslog'
-      $default_syslogd_options   = ''
+      $default_syslogd_options   = undef
       $default_pid_file          = '/var/run/rsyslogd.pid'
       $default_mod_imjournal     = false
       case $::operatingsystemrelease {
@@ -468,7 +468,7 @@ class rsyslog (
     # logging servers do not log elsewhere
     $remote_logging_real = false
 
-    include common
+    include ::common
 
     common::mkdir_p { $log_dir: }
 
