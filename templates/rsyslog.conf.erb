@@ -11,7 +11,7 @@
 
 $ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)
 $ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
-<% if @mod_imjournal.to_s == 'true' -%>
+<% if @mod_imjournal_real.to_s == 'true' -%>
 $ModLoad imjournal # provides access to the systemd journal
 <% end -%>
 #$ModLoad immark.so	# provides --MARK-- message capability
@@ -32,7 +32,7 @@ $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 <% end -%>
 #### GLOBAL DIRECTIVES ####
 
-<% if @mod_imjournal.to_s == 'true' -%>
+<% if @mod_imjournal_real.to_s == 'true' -%>
 # Where to place auxilliary files
 $WorkDirectory <%= @work_directory %>
 <% end -%>
@@ -48,7 +48,7 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 #$ActionFileEnableSync on
 <% end -%>
 
-<% if @mod_imjournal.to_s == 'true' -%>
+<% if @mod_imjournal_real.to_s == 'true' -%>
 # Turn off message reception via local log socket;
 # local messages are retrieved through imjournal now.
 $OmitLocalLogging on

@@ -613,6 +613,40 @@ describe 'rsyslog' do
       end
     end
 
+    describe 'on a platform with mod_imjournal set to true' do
+      let :facts do
+        {
+          :osfamily               => 'RedHat',
+          :operatingsystemrelease => '7.0',
+          :kernel                 => 'Linux',
+          :domain                 => 'defaultdomain',
+          :rsyslog_version        => '5.8.10',
+        }
+      end
+
+      context 'work_directory specified' do
+        let :params do
+          {
+            :work_directory => '/tmp/foo',
+            :mod_imjournal  => true,
+          }
+        end
+
+        it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/tmp\/foo$/) }
+      end
+
+      context 'journalstate_file specified' do
+        let :params do
+          {
+            :journalstate_file => 'my.journal',
+            :mod_imjournal     => true,
+          }
+        end
+
+        it { should contain_file('rsyslog_config').with_content(/^\$IMJournalStateFile my.journal$/) }
+      end
+    end
+
     describe 'rsyslog_package' do
       context 'with default params' do
         it {
@@ -1345,7 +1379,47 @@ describe 'rsyslog' do
         end
       end
     end
+  end
 
+  describe 'module platform support' do
+    platforms = {
+      'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :mod_imjournal => false, },
+      'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :mod_imjournal => false, },
+      'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :mod_imjournal => true, },
+      'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :mod_imjournal => false, },
+      'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :mod_imjournal => false, },
+      'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :mod_imjournal => false, },
+      'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12',   :mod_imjournal => false, },
+      'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :mod_imjournal => false, },
+      'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :mod_imjournal => false, },
+    }
+
+    platforms.sort.each do |k,v|
+      context "on osfamily #{v[:osfamily]} with major release #{v[:release]} support for mod_imjournal is #{v[:mod_imjournal]}" do
+        let :facts do
+          {
+            :kernel                 => v[:kernel],
+            :osfamily               => v[:osfamily],
+            :operatingsystemrelease => v[:release],
+            :kernelrelease          => v[:release],
+            :domain                 => 'defaultdomain',
+            :rsyslog_version        => '5.8.10',
+          }
+        end
+
+        if v[:mod_imjournal] == true
+          it { should contain_file('rsyslog_config').with_content(/^\$ModLoad imjournal/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$WorkDirectory \/var\/lib\/rsyslog$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$OmitLocalLogging on$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$IMJournalStateFile imjournal.state$/) }
+        else
+          it { should contain_file('rsyslog_config').without_content(/^\s*\$ModLoad\s+imjournal/) }
+          it { should contain_file('rsyslog_config').without_content(/^\s*\$WorkDirectory/) }
+          it { should contain_file('rsyslog_config').without_content(/^\s*\$OmitLocalLogging/) }
+          it { should contain_file('rsyslog_config').without_content(/^\s*\$IMJournalStateFile/) }
+        end
+      end
+    end
   end
 
   describe 'variable type and content validations' do
@@ -1366,11 +1440,29 @@ describe 'rsyslog' do
     end
 
     validations = {
+      'absolute_path' => {
+        :name    => ['work_directory'],
+        :valid   => ['/absolute/filepath','/absolute/directory/'],
+        :invalid => ['invalid',3,2.42,['array'],a={'ha'=>'sh'}],
+        :message => 'is not an absolute path',
+      },
       'array/string' => {
         :name    => %w(log_server),
         :valid   => [%w(ar ray), 'string'],
         :invalid => [{ 'ha' => 'sh' }, 3, 2.42, true, false],
         :message => 'must be an array or string',
+      },
+      'boolean' => {
+        :name    => ['mod_imjournal'],
+        :valid   => [true,false,'true','false'],
+        :invalid => ['string',['array'],a={'ha'=>'sh'},3,2.42,nil],
+        :message => 'str2bool()',
+      },
+      'string' => {
+        :name    => ['journalstate_file'],
+        :valid   => ['valid'],
+        :invalid => [['array'],a={'ha'=>'sh'},true],
+        :message => 'is not a string',
       },
     }
 
