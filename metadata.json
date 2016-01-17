@@ -1,6 +1,6 @@
 {
   "name": "ghoneycutt-rsyslog",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "author": "ghoneycutt",
   "summary": "Manage rsyslog",
   "license": "Apache-2.0",
