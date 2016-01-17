@@ -64,6 +64,9 @@ class rsyslog (
   $umask                    = undef,
   $file_create_mode         = '0644',
   $dir_create_mode          = '0700',
+  $work_directory           = '/var/lib/rsyslog',
+  $journalstate_file        = 'imjournal.state',
+  $mod_imjournal            = 'USE_DEFAULTS',
 ) {
 
   # validation
@@ -168,6 +171,8 @@ class rsyslog (
   validate_absolute_path($rsyslog_d_dir)
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")
   validate_absolute_path($kernel_target)
+  validate_absolute_path($work_directory)
+  validate_string($journalstate_file)
 
   case $::osfamily {
     'RedHat': {
@@ -179,16 +184,19 @@ class rsyslog (
           $default_pid_file        = '/var/run/rsyslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel5.erb'
           $default_syslogd_options = '-m 0'
+          $default_mod_imjournal   = false
         }
         /^6\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel6.erb'
-          $default_syslogd_options = ''
+          $default_syslogd_options = undef
+          $default_mod_imjournal   = false
         }
         /^7\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel7.erb'
           $default_syslogd_options = '-c 4'
+          $default_mod_imjournal   = true
         }
         default: {
           fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::operatingsystemrelease}")
@@ -198,19 +206,21 @@ class rsyslog (
       require 'sysklogd'
     }
     'Debian': {
-      $default_logrotate_present      = true
-      $default_service_name           = 'rsyslog'
-      $default_sysconfig_path         = '/etc/default/rsyslog'
-      $default_pid_file               = '/var/run/rsyslogd.pid'
-      $sysconfig_erb                  = 'sysconfig.debian.erb'
-      $default_syslogd_options        = '-c5'
+      $default_logrotate_present = true
+      $default_service_name      = 'rsyslog'
+      $default_sysconfig_path    = '/etc/default/rsyslog'
+      $default_pid_file          = '/var/run/rsyslogd.pid'
+      $sysconfig_erb             = 'sysconfig.debian.erb'
+      $default_syslogd_options   = '-c5'
+      $default_mod_imjournal     = false
     }
     'Suse' : {
-      $default_logrotate_present      = true
-      $default_service_name           = 'syslog'
-      $default_sysconfig_path         = '/etc/sysconfig/syslog'
-      $default_syslogd_options        = ''
-      $default_pid_file               = '/var/run/rsyslogd.pid'
+      $default_logrotate_present = true
+      $default_service_name      = 'syslog'
+      $default_sysconfig_path    = '/etc/sysconfig/syslog'
+      $default_syslogd_options   = undef
+      $default_pid_file          = '/var/run/rsyslogd.pid'
+      $default_mod_imjournal     = false
       case $::operatingsystemrelease {
         /^10\.*/ : {
           $sysconfig_erb = 'sysconfig.suse10.erb'
@@ -228,6 +238,7 @@ class rsyslog (
     }
     'Solaris': {
       $default_logrotate_present = false
+      $default_mod_imjournal     = false
       case $::kernelrelease {
         '5.10', '5.11' : {
           $default_service_name      = 'network/cswrsyslog'
@@ -263,6 +274,15 @@ class rsyslog (
     default        => $pid_file
   }
   validate_absolute_path($pid_file_real)
+
+  if is_bool($mod_imjournal) == true {
+    $mod_imjournal_real = $mod_imjournal
+  } else {
+    $mod_imjournal_real = $mod_imjournal ? {
+      'USE_DEFAULTS' => $default_mod_imjournal,
+      default        => str2bool($mod_imjournal)
+    }
+  }
 
   $default_log_entries = [
     '# Log all kernel messages to the console.',
@@ -448,7 +468,7 @@ class rsyslog (
     # logging servers do not log elsewhere
     $remote_logging_real = false
 
-    include common
+    include ::common
 
     common::mkdir_p { $log_dir: }
 

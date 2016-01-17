@@ -11,6 +11,9 @@
 
 $ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)
 $ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
+<% if @mod_imjournal_real.to_s == 'true' -%>
+$ModLoad imjournal # provides access to the systemd journal
+<% end -%>
 #$ModLoad immark.so	# provides --MARK-- message capability
 
 <% if @is_log_server_real.to_s == 'true' -%>
@@ -29,6 +32,11 @@ $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 <% end -%>
 #### GLOBAL DIRECTIVES ####
 
+<% if @mod_imjournal_real.to_s == 'true' -%>
+# Where to place auxilliary files
+$WorkDirectory <%= @work_directory %>
+<% end -%>
+
 # Use default timestamp format
 <% if @rsyslog_conf_version_real == 2 -%>
 $template TraditionalFormat,"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0"
@@ -39,6 +47,16 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 # not useful and an extreme performance hit
 #$ActionFileEnableSync on
 <% end -%>
+
+<% if @mod_imjournal_real.to_s == 'true' -%>
+# Turn off message reception via local log socket;
+# local messages are retrieved through imjournal now.
+$OmitLocalLogging on
+
+# File to store the position in the journal
+$IMJournalStateFile <%= @journalstate_file %>
+<% end -%>
+
 <% if @use_tls_real.to_s == 'true' -%>
 
 $DefaultNetstreamDriverCAFile <%= @ca_file %> # trust these CAs

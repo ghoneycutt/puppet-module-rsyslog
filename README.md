@@ -422,6 +422,24 @@ The creation mode with which rsyslogd creates new directories.
 
 - *Default*: '0700'
 
+work_directory
+--------------
+The default location for work (spool) files.
+
+- *Default*: '/var/lib/rsyslog'
+
+journalstate_file
+-----------------
+The journal state file used by rsyslog.
+
+- *Default*: 'imjournal.state'
+
+mod_imjournal
+-------------
+Boolean for using the imjournal module. If set to 'USE_DEFAULTS', this will be chosen based on the platform.
+
+- *Default*: 'USE_DEFAULTS'
+
 ===
 
 # rsyslog::fragment define #
