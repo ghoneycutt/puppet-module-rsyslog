@@ -67,6 +67,7 @@ class rsyslog (
   $work_directory           = '/var/lib/rsyslog',
   $journalstate_file        = 'imjournal.state',
   $mod_imjournal            = 'USE_DEFAULTS',
+  $manage_devlog            = 'USE_DEFAULTS',
 ) {
 
   # validation
@@ -185,18 +186,21 @@ class rsyslog (
           $sysconfig_erb           = 'sysconfig.rhel5.erb'
           $default_syslogd_options = '-m 0'
           $default_mod_imjournal   = false
+          $default_manage_devlog   = false
         }
         /^6\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel6.erb'
           $default_syslogd_options = undef
           $default_mod_imjournal   = false
+          $default_manage_devlog   = false
         }
         /^7\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel7.erb'
           $default_syslogd_options = '-c 4'
           $default_mod_imjournal   = true
+          $default_manage_devlog   = true
         }
         default: {
           fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::operatingsystemrelease}")
@@ -213,6 +217,7 @@ class rsyslog (
       $sysconfig_erb             = 'sysconfig.debian.erb'
       $default_syslogd_options   = '-c5'
       $default_mod_imjournal     = false
+      $default_manage_devlog     = false
     }
     'Suse' : {
       $default_logrotate_present = true
@@ -221,6 +226,7 @@ class rsyslog (
       $default_syslogd_options   = undef
       $default_pid_file          = '/var/run/rsyslogd.pid'
       $default_mod_imjournal     = false
+      $default_manage_devlog     = false
       case $::operatingsystemrelease {
         /^10\.*/ : {
           $sysconfig_erb = 'sysconfig.suse10.erb'
@@ -239,6 +245,7 @@ class rsyslog (
     'Solaris': {
       $default_logrotate_present = false
       $default_mod_imjournal     = false
+      $default_manage_devlog     = false
       case $::kernelrelease {
         '5.10', '5.11' : {
           $default_service_name      = 'network/cswrsyslog'
@@ -281,6 +288,22 @@ class rsyslog (
     $mod_imjournal_real = $mod_imjournal ? {
       'USE_DEFAULTS' => $default_mod_imjournal,
       default        => str2bool($mod_imjournal)
+    }
+  }
+
+  if is_bool($manage_devlog) == true {
+    $manage_devlog_real = $manage_devlog
+  } else {
+    $manage_devlog_real = $manage_devlog ? {
+      'USE_DEFAULTS' => $default_manage_devlog,
+      default        => str2bool($manage_devlog)
+    }
+  }
+
+  if $manage_devlog_real == true {
+    exec { 'manage devlog':
+      command => '/bin/systemctl restart systemd-journald.socket',
+      creates => '/dev/log',
     }
   }
 
