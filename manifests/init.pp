@@ -302,8 +302,9 @@ class rsyslog (
 
   if $manage_devlog_real == true {
     exec { 'manage devlog':
-      command => '/bin/systemctl restart systemd-journald.socket',
+      command => 'systemctl restart systemd-journald.socket',
       creates => '/dev/log',
+      path    => '/bin:/usr/bin:/sbin:/usr/sbin',
     }
   }
 
