@@ -440,6 +440,12 @@ Boolean for using the imjournal module. If set to 'USE_DEFAULTS', this will be c
 
 - *Default*: 'USE_DEFAULTS'
 
+manage_devlog
+-------------
+Boolean for managing /dev/log.  If set to 'USE_DEFAULTS', this will be chosen based on the platform.
+
+- *Default*: 'USE_DEFAULTS'
+
 ===
 
 # rsyslog::fragment define #

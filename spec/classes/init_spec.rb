@@ -52,6 +52,32 @@ describe 'rsyslog' do
       end
 
       [true,'true'].each do |value|
+        context "with manage_devlog set to #{value}" do
+          let :params do
+            { :manage_devlog => value }
+          end
+
+          it {
+            should contain_exec('manage devlog').with({
+              'command' => 'systemctl restart systemd-journald.socket',
+              'creates' => '/dev/log',
+              'path'    => '/bin:/usr/bin:/sbin:/usr/sbin',
+            })
+          }
+        end
+      end
+
+      [false,'false'].each do |value|
+        context "with manage_devlog set to #{value}" do
+          let :params do
+            { :manage_devlog => value }
+          end
+
+          it { should_not contain_exec('manage devlog') }
+        end
+      end
+
+      [true,'true'].each do |value|
         context "with is_log_server set to #{value}" do
           let :params do
             { :is_log_server => value }
@@ -1381,7 +1407,7 @@ describe 'rsyslog' do
     end
   end
 
-  describe 'module platform support' do
+  describe 'module platform support for mod_imjournal' do
     platforms = {
       'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :mod_imjournal => false, },
       'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :mod_imjournal => false, },
@@ -1417,6 +1443,47 @@ describe 'rsyslog' do
           it { should contain_file('rsyslog_config').without_content(/^\s*\$WorkDirectory/) }
           it { should contain_file('rsyslog_config').without_content(/^\s*\$OmitLocalLogging/) }
           it { should contain_file('rsyslog_config').without_content(/^\s*\$IMJournalStateFile/) }
+        end
+      end
+    end
+  end
+
+  describe 'module platform support for manage_devlog' do
+    platforms = {
+      'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :manage_devlog => false, },
+      'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :manage_devlog => false, },
+      'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :manage_devlog => true, },
+      'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :manage_devlog => false, },
+      'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :manage_devlog => false, },
+      'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :manage_devlog => false, },
+      'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12',   :manage_devlog => false, },
+      'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :manage_devlog => false, },
+      'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :manage_devlog => false, },
+    }
+
+    platforms.sort.each do |k,v|
+      context "on osfamily #{v[:osfamily]} with major release #{v[:release]} support for manage_devlog is #{v[:manage_devlog]}" do
+        let :facts do
+          {
+            :kernel                 => v[:kernel],
+            :osfamily               => v[:osfamily],
+            :operatingsystemrelease => v[:release],
+            :kernelrelease          => v[:release],
+            :domain                 => 'defaultdomain',
+            :rsyslog_version        => '5.8.10',
+          }
+        end
+
+        if v[:manage_devlog] == true
+          it {
+            should contain_exec('manage devlog').with({
+              'command' => 'systemctl restart systemd-journald.socket',
+              'creates' => '/dev/log',
+              'path'    => '/bin:/usr/bin:/sbin:/usr/sbin',
+            })
+          }
+        else
+          it { should_not contain_exec('manage devlog') }
         end
       end
     end
