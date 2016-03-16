@@ -26,5 +26,6 @@ gem 'puppet-lint-variable_contains_upcase'
 
 # rspec must be v2 for ruby 1.8.7
 if RUBY_VERSION >= '1.8.7' and RUBY_VERSION < '1.9'
+  gem 'rake', '~> 10.0'
   gem 'rspec', '~> 2.0'
 end
