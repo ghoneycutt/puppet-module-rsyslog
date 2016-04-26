@@ -48,6 +48,11 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 #$ActionFileEnableSync on
 <% end -%>
 
+<% if @msg_reduction -%>
+# Filter duplicated messages
+$RepeatedMsgReduction on
+<% end -%>
+
 <% if @mod_imjournal_real.to_s == 'true' -%>
 # Turn off message reception via local log socket;
 # local messages are retrieved through imjournal now.
