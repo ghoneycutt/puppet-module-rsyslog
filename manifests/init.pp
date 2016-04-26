@@ -595,6 +595,8 @@ class rsyslog (
     mode    => $rsyslog_d_dir_mode,
     recurse => true,
     purge   => $rsyslog_d_dir_purge_real,
+    # The listen.conf is managed by systemd package
+    ignore  => 'listen.conf',
     require => Common::Mkdir_p[$rsyslog_d_dir],
   }
 
