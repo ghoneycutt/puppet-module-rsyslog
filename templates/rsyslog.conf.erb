@@ -37,16 +37,29 @@ $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
 $WorkDirectory <%= @work_directory %>
 <% end -%>
 
+<% if @log_templates and ! @log_templates.empty? -%>
+
+# Define custom logging templates
+<% @log_templates.flatten.compact.each do |log_template| -%>
+$template <%= log_template['name'] %>,"<%= log_template['template'] %>"
+<% end -%>
+<% end -%>
+<% if @actionfiletemplate -%>
+
+# Using specified format for default logging format:
+$ActionFileDefaultTemplate <%= @actionfiletemplate %>
+<% else -%>
 # Use default timestamp format
 <% if @rsyslog_conf_version_real == 2 -%>
 $template TraditionalFormat,"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-last-lf%0"
 <% else -%>
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+<% end -%>
+<% end -%>
 
 # File syncing capability is disabled by default. This feature is usually not required,
 # not useful and an extreme performance hit
 #$ActionFileEnableSync on
-<% end -%>
 
 <% if @mod_imjournal_real.to_s == 'true' -%>
 # Turn off message reception via local log socket;
