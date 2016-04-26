@@ -31,6 +31,7 @@ class rsyslog (
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
   $daemon_enable            = true,
+  $msg_reduction            = false,
   $is_log_server            = false,
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
