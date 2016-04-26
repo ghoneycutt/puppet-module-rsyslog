@@ -39,6 +39,8 @@ class rsyslog (
   $remote_template          = '%HOSTNAME%/%$YEAR%-%$MONTH%-%$DAY%.log',
   $remote_logging           = false,
   $rsyslog_conf_version     = 'USE_DEFAULTS',
+  $log_templates            = false,
+  $actionfiletemplate       = false,
   $rsyslog_d_dir            = '/etc/rsyslog.d',
   $rsyslog_d_dir_owner      = 'root',
   $rsyslog_d_dir_group      = 'root',
