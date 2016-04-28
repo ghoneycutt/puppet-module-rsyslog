@@ -48,7 +48,7 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 #$ActionFileEnableSync on
 <% end -%>
 
-<% if @msg_reduction -%>
+<% if @msg_reduction == 'true' -%>
 # Filter duplicated messages
 $RepeatedMsgReduction on
 <% end -%>
