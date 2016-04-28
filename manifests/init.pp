@@ -31,6 +31,7 @@ class rsyslog (
   $daemon                   = 'USE_DEFAULTS',
   $daemon_ensure            = 'running',
   $daemon_enable            = true,
+  $msg_reduction            = false,
   $is_log_server            = false,
   $log_dir                  = '/srv/logs',
   $log_dir_owner            = 'root',
@@ -168,6 +169,13 @@ class rsyslog (
       fail("daemon_enable may be either true, false or 'manual' and is set to <${daemon_enable}>.")
     }
   }
+
+  if is_string($msg_reduction) == true {
+    $msg_reduction_bool = str2bool($msg_reduction)
+  } else {
+    $msg_reduction_bool = $msg_reduction
+  }
+  validate_bool($msg_reduction_bool)
 
   validate_absolute_path($rsyslog_d_dir)
   validate_re($daemon_ensure, '^(running|stopped)$', "daemon_ensure may be either 'running' or 'stopped' and is set to <${daemon_ensure}>.")

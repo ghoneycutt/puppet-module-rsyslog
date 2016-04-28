@@ -570,6 +570,16 @@ describe 'rsyslog' do
           end
           it { should contain_file('rsyslog_config').with_content(/^\$DirCreateMode 0770$/) }
         end
+
+	context 'with msg_reduction=true' do
+          let :params do
+            {
+              :msg_reduction => 'true',
+            }
+          end
+          it { should contain_file('rsyslog_config').with_content(/^# Filter duplicated messages$/) }
+          it { should contain_file('rsyslog_config').with_content(/^\$RepeatedMsgReduction on$/) }
+        end
       end
     end
 

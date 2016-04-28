@@ -43,6 +43,11 @@ $template TraditionalFormat,"%timegenerated% %HOSTNAME% %syslogtag%%msg:::drop-l
 <% else -%>
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 
+<% if @msg_reduction_bool.to_s == 'true' -%>
+# Filter duplicated messages
+$RepeatedMsgReduction on
+<% end -%>
+
 # File syncing capability is disabled by default. This feature is usually not required,
 # not useful and an extreme performance hit
 #$ActionFileEnableSync on
