@@ -198,7 +198,7 @@ class rsyslog (
         /^7\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel7.erb'
-          $default_syslogd_options = '-c 4'
+          $default_syslogd_options = undef
           $default_mod_imjournal   = true
           $default_manage_devlog   = true
         }
