@@ -1539,6 +1539,12 @@ describe 'rsyslog' do
         :invalid => ['string',['array'],a={'ha'=>'sh'},3,2.42,nil],
         :message => 'str2bool()',
       },
+      'boolean' => {
+        :name    => ['msg_reduction'],
+        :valid   => [true,false,'true','false'],
+        :invalid => ['string',['array'],a={'ha'=>'sh'},3,2.42,nil],
+        :message => 'str2bool()',
+      },
       'string' => {
         :name    => ['journalstate_file'],
         :valid   => ['valid'],
