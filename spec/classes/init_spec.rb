@@ -574,9 +574,9 @@ describe 'rsyslog' do
 	context 'with msg_reduction=true' do
 	  ['true',true].each do |value|
 	    context "set to #{value}" do
-        let (:params)
+        let :params do
           {
-            :msg_reduction => value
+            :msg_reduction => value,
           }
         end
         it { should contain_file('rsyslog_config').with_content(/^# Filter duplicated messages$/) }
@@ -586,9 +586,9 @@ describe 'rsyslog' do
 
       ['false',false].each do |value|
 	      context "set to #{value}" do
-          let (:params)
+          let :params do
             {
-              :msg_reduction => value
+              :msg_reduction => value,
             }
           end
           it { should contain_file('rsyslog_config').without_content(/^# Filter duplicated messages$/) }
