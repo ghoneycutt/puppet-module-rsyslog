@@ -574,20 +574,28 @@ describe 'rsyslog' do
 	context 'with msg_reduction=true' do
 	  ['true',true].each do |value|
 	    context "set to #{value}" do
-        let (:params) { { :msg_reduction => value } }
-
-            it { should contain_file('rsyslog_config').with_content(/^# Filter duplicated messages$/) }
-            it { should contain_file('rsyslog_config').with_content(/^\$RepeatedMsgReduction on$/) }
+        let (:params)
+          {
+            :msg_reduction => value
+          }
+        end
+        it { should contain_file('rsyslog_config').with_content(/^# Filter duplicated messages$/) }
+        it { should contain_file('rsyslog_config').with_content(/^\$RepeatedMsgReduction on$/) }
         end
       end
+
       ['false',false].each do |value|
 	      context "set to #{value}" do
-          let (:params) { { :msg_reduction => value } }
-
-            it { should contain_file('rsyslog_config').without_content(/^# Filter duplicated messages$/) }
-            it { should contain_file('rsyslog_config').without_content(/^\$RepeatedMsgReduction on$/) }
+          let (:params)
+            {
+              :msg_reduction => value
+            }
+          end
+          it { should contain_file('rsyslog_config').without_content(/^# Filter duplicated messages$/) }
+          it { should contain_file('rsyslog_config').without_content(/^\$RepeatedMsgReduction on$/) }
         end
       end
+    end
 
     context 'with use_tls' do
       ['false',false].each do |value|
