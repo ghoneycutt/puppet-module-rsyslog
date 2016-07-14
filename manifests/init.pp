@@ -207,7 +207,7 @@ class rsyslog (
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
-      require 'sysklogd'
+      require '::sysklogd'
     }
     'Debian': {
       $default_logrotate_present = true
