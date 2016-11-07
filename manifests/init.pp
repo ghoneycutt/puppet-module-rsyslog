@@ -246,6 +246,8 @@ class rsyslog (
       $default_logrotate_present = false
       $default_mod_imjournal     = false
       $default_manage_devlog     = false
+      $default_sysconfig_path    = undef
+      $default_syslogd_options   = undef
       case $::kernelrelease {
         '5.10', '5.11' : {
           $default_service_name      = 'network/cswrsyslog'
