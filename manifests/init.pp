@@ -248,6 +248,7 @@ class rsyslog (
       $default_manage_devlog     = false
       $default_sysconfig_path    = undef
       $default_syslogd_options   = undef
+      $sysconfig_erb             = undef # only used when $::kernel == 'Linux'
       case $::kernelrelease {
         '5.10', '5.11' : {
           $default_service_name      = 'network/cswrsyslog'
@@ -552,11 +553,11 @@ class rsyslog (
   if $::kernel == 'Linux' {
     file { 'rsyslog_sysconfig':
       ensure  => file,
-      content => template("rsyslog/${rsyslog::sysconfig_erb}"),
-      path    => $rsyslog::sysconfig_path_real,
-      owner   => $rsyslog::sysconfig_owner,
-      group   => $rsyslog::sysconfig_group,
-      mode    => $rsyslog::sysconfig_mode,
+      content => template("rsyslog/${sysconfig_erb}"),
+      path    => $sysconfig_path_real,
+      owner   => $sysconfig_owner,
+      group   => $sysconfig_group,
+      mode    => $sysconfig_mode,
       require => Package[$package_real],
       notify  => Service['rsyslog_daemon'],
     }
