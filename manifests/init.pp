@@ -418,7 +418,7 @@ class rsyslog (
                                             'create 640 root root',
                                             'sharedscripts',
                                             'postrotate',
-                                            '    service syslog reload > /dev/null',
+                                            '    /sbin/service syslog reload > /dev/null',
                                             'endscript',
                                           ]
       }
