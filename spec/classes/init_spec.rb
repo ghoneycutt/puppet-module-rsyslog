@@ -250,7 +250,7 @@ describe 'rsyslog' do
         it { should contain_file('rsyslog_config').without_content(/^\$ModLoad imtcp$/) }
       end
 
-      ['logserver', %w(logserver1 logserver2)].each do |values|
+      ['logserver', %w(logserver1 logserver2 logserver3:1514 logserver4:2514)].each do |values|
         context "with remote_logging enabled and log_server=#{values} (as #{values.class})" do
           let :params do
             {
@@ -261,7 +261,11 @@ describe 'rsyslog' do
 
           if values.class == Array
             values.each do |value|
-              it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@#{value}:514$/) }
+              if value.include? ":"
+                it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@#{value}$/) }
+              else
+                it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@#{value}:514$/) }
+              end
             end
           else
             it { should contain_file('rsyslog_config').with_content(/^\*\.\* @@logserver:514$/) }

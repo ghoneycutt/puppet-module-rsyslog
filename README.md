@@ -335,7 +335,7 @@ Transport protocol used by rsyslog. Valid values are 'tcp' and 'udp'
 
 log_server
 ----------
-String or array of server to send logs to if remote_logging is true.
+String or array of server to send logs to if remote_logging is true. May include an optional port number if you wish to override the log_server_port value for an entry.
 
 *Example:*
 <pre>
@@ -345,14 +345,15 @@ _OR_
 <pre>
 rsyslog::log_server:
   - 'log1'
-  - 'log2'
+  - 'log2:1514'
+  - 'log3:2514'
 </pre>
 
 - *Default*: "log.${::domain}"
 
 log_server_port
 ---------------
-Port of the server to send logs to if remote_logging is true.
+Default port of the server to send logs to if remote_logging is true. Will not be used if a log_server entry contains a port number.
 
 - *Default*: '514'
 

@@ -106,7 +106,11 @@ $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
 <% end -%>
 <% @log_server_real.each do |server| -%>
+<% if server.include? ":" -%>
+<%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= server %>
+<% else -%>
 <%= @source_facilities %> <% if @transport_protocol == 'tcp' -%>@<% end -%>@<%= server -%>:<%= @log_server_port %>
+<% end -%>
 <% end -%>
 <% end -%>
 <% if @rsyslog_conf_version_real > 2 -%>
