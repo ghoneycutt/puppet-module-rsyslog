@@ -9,21 +9,21 @@
 <% if @rsyslog_conf_version_real > 2 -%>
 #### MODULES ####
 
-$ModLoad imuxsock.so	# provides support for local system logging (e.g. via logger command)
-$ModLoad imklog.so	# provides kernel logging support (previously done by rklogd)
+$ModLoad imuxsock	# provides support for local system logging (e.g. via logger command)
+$ModLoad imklog	# provides kernel logging support (previously done by rklogd)
 <% if @mod_imjournal_real.to_s == 'true' -%>
 $ModLoad imjournal # provides access to the systemd journal
 <% end -%>
-#$ModLoad immark.so	# provides --MARK-- message capability
+#$ModLoad immark	# provides --MARK-- message capability
 
 <% if @is_log_server_real.to_s == 'true' -%>
 <% if @my_enable_udp_server.to_s == 'true' -%>
 # Provides UDP syslog reception
-$ModLoad imudp.so
+$ModLoad imudp
 <% end -%>
 <% if @my_enable_tcp_server.to_s == 'true' -%>
 # Provides TCP syslog reception
-$ModLoad imtcp.so
+$ModLoad imtcp
 <% end -%>
 # log every source in its own directory
 $template RemoteHost, "<%= @log_dir %>/<%= @remote_template %>"
