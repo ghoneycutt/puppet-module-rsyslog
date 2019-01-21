@@ -187,7 +187,9 @@ class rsyslog (
           $default_syslogd_options = '-m 0'
           $default_mod_imjournal   = false
           $default_manage_devlog   = false
-        }
+          # ensures that sysklogd is absent, which is needed on EL5
+          require '::sysklogd'
+       }
         /^6\.*/: {
           $default_pid_file        = '/var/run/syslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel6.erb'
@@ -206,8 +208,6 @@ class rsyslog (
           fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::operatingsystemrelease}")
         }
       }
-      # ensures that sysklogd is absent, which is needed on EL5
-      require '::sysklogd'
     }
     'Debian': {
       $default_logrotate_present = true
