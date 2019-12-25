@@ -213,6 +213,12 @@ Whether a service should be enabled to start at boot. Valid values are true, fal
 
 - *Default*: true
 
+msg_reduction
+-------------
+Filter duplicated messages. Valid values are true and false.
+
+- *Default*: false
+
 is_log_server
 -------------
 Boolean to determine if the system syslog service is meant to receive messages from remote hosts.
