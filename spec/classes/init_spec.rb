@@ -344,7 +344,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error)
+          }.to raise_error(Puppet::Error,/is not an absolute path/)
         end
       end
 
@@ -940,7 +940,7 @@ describe 'rsyslog' do
         it do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error)
+          }.to raise_error(Puppet::Error,/is not an absolute path/)
         end
       end
     end
@@ -1228,7 +1228,7 @@ describe 'rsyslog' do
         it 'should fail' do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error)
+          }.to raise_error(Puppet::Error,/is not an absolute path/)
         end
       end
 
@@ -1264,7 +1264,7 @@ describe 'rsyslog' do
         it 'should fail' do
           expect {
             should contain_class('rsyslog')
-          }.to raise_error(Puppet::Error)
+          }.to raise_error(Puppet::Error,/str2bool\(\)/)
         end
       end
     end
