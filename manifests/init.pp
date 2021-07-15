@@ -207,7 +207,7 @@ class rsyslog (
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5
-      require '::sysklogd'
+      require 'sysklogd'
     }
     'Debian': {
       $default_logrotate_present = true
@@ -495,7 +495,7 @@ class rsyslog (
     # logging servers do not log elsewhere
     $remote_logging_real = false
 
-    include ::common
+    include common
 
     common::mkdir_p { $log_dir: }
 

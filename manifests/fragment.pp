@@ -7,7 +7,7 @@ define rsyslog::fragment (
   $content = undef,
 ) {
 
-  include ::rsyslog
+  include rsyslog
 
   validate_re($ensure, ['file','absent'])
   validate_string($content)
