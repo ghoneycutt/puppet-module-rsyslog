@@ -40,7 +40,7 @@ describe 'rsyslog::fragment' do
     it 'should fail' do
       expect {
         should contain_class('rsyslog')
-      }.to raise_error(Puppet::Error)
+      }.to raise_error(Puppet::Error,/is not a string/)
     end
   end
 
@@ -67,7 +67,7 @@ describe 'rsyslog::fragment' do
       it 'should fail' do
         expect {
           should contain_class('rsyslog')
-        }.to raise_error(Puppet::Error)
+        }.to raise_error(Puppet::Error,/does not match ..file., .absent/)
       end
     end
   end

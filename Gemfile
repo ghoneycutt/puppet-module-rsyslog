@@ -7,7 +7,7 @@ else
 end
 
 gem 'facter', '>= 1.7.0', :require => false
-gem 'rspec-puppet', '>= 2.4.0', :require => false
+gem 'rspec-puppet', '~> 2.7.0', :require => false
 gem 'puppet-lint', '~> 2.0', :require => false
 gem 'puppet-lint-absolute_classname-check', :require => false
 gem 'puppet-lint-alias-check', :require => false
@@ -28,7 +28,10 @@ gem 'json_pure', '<= 2.0.1', :require => false        if RUBY_VERSION < '2.0.0'
 gem 'metadata-json-lint',     '0.0.11'   if RUBY_VERSION >= '1.8.7' && RUBY_VERSION < '1.9'
 gem 'metadata-json-lint',     '1.0.0'    if RUBY_VERSION >= '1.9' && RUBY_VERSION < '2.0'
 gem 'metadata-json-lint' if RUBY_VERSION >= '2.0'
+gem 'public_suffix',      '~> 1.1.0' if RUBY_VERSION < '2.1.1' && RUBY_VERSION >= '1.9'
+gem 'public_suffix',      '1.3.0'    if RUBY_VERSION < '1.9'
 
 gem 'puppetlabs_spec_helper', '2.0.2',    :require => false if RUBY_VERSION >= '1.8.7' && RUBY_VERSION < '1.9'
-gem 'puppetlabs_spec_helper', '>= 2.0.0', :require => false if RUBY_VERSION >= '1.9'
+gem 'puppetlabs_spec_helper', '~> 2.7',   :require => false if RUBY_VERSION >= '1.9'
 gem 'parallel_tests',         '<= 2.9.0', :require => false if RUBY_VERSION < '2.0.0'
+gem 'parallel',               '1.3.3.1',  :require => false if RUBY_VERSION < '1.9'
