@@ -237,8 +237,11 @@ class rsyslog (
         /^12\.*/ : {
           $sysconfig_erb = 'sysconfig.suse12.erb'
         }
+        /^15\.*/ : {
+          $sysconfig_erb = 'sysconfig.suse15.erb'
+        }
         default: {
-          fail("rsyslog supports Suse like systems with major release 10 and 11, and you have ${::operatingsystemrelease}")
+          fail("rsyslog supports Suse like systems with major release 10, 11, 12 and 15, and you have ${::operatingsystemrelease}")
         }
       }
     }

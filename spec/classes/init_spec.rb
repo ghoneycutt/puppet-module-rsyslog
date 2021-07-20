@@ -809,6 +809,7 @@ describe 'rsyslog' do
         'suse10'    => { :osfamily => 'Suse',    :release => '10.1',   :kernel => 'Linux',   },
         'suse11'    => { :osfamily => 'Suse',    :release => '11.1',   :kernel => 'Linux',   },
         'suse12'    => { :osfamily => 'Suse',    :release => '12.1',   :kernel => 'Linux',   },
+        'suse15'    => { :osfamily => 'Suse',    :release => '15.1',   :kernel => 'Linux',   },
         'solaris10' => { :osfamily => 'Solaris', :release => '5.10', :kernel => 'Solaris', },
         'solaris11' => { :osfamily => 'Solaris', :release => '5.11', :kernel => 'Solaris', },
       }
@@ -1182,6 +1183,36 @@ describe 'rsyslog' do
           it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS="-c0"$/) }
         end
       end
+
+      context 'on Suse 15' do
+        let :facts do
+          {
+            :kernel                 => 'Linux',
+            :osfamily               => 'Suse',
+            :operatingsystemrelease => '15.0',
+          }
+        end
+
+        context 'with default params' do
+          it {
+            should contain_file('rsyslog_sysconfig').with({
+              'path'    => '/etc/sysconfig/syslog',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'mode'    => '0644',
+              'require' => 'Package[rsyslog]',
+              'notify'  => 'Service[rsyslog_daemon]',
+            })
+          }
+          it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS=""$/) }
+        end
+
+        context 'with syslogd_options specified as valid value' do
+          let(:params) { { :syslogd_options => '-c0' } }
+
+          it { should contain_file('rsyslog_sysconfig').with_content(/^RSYSLOGD_PARAMS="-c0"$/) }
+        end
+      end
     end
 
     describe 'rsyslog_d_dir' do
@@ -1373,6 +1404,7 @@ describe 'rsyslog' do
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10.2',   :support => 'supported', },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11.1',   :support => 'supported', },
       'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12.1',   :support => 'supported', },
+      'suse15'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '15.1',   :support => 'supported', },
       'solaris9'  => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.9',  :support => 'unsupported', },
       'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :support => 'supported', },
       'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :support => 'supported', },
@@ -1420,6 +1452,7 @@ describe 'rsyslog' do
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :mod_imjournal => false, },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :mod_imjournal => false, },
       'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12',   :mod_imjournal => false, },
+      'suse15'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '15',   :mod_imjournal => false, },
       'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :mod_imjournal => false, },
       'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :mod_imjournal => false, },
     }
@@ -1461,6 +1494,7 @@ describe 'rsyslog' do
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :manage_devlog => false, },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :manage_devlog => false, },
       'suse12'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '12',   :manage_devlog => false, },
+      'suse15'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '15',   :manage_devlog => false, },
       'solaris10' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.10', :manage_devlog => false, },
       'solaris11' => { :kernel => 'Solaris', :osfamily => 'Solaris', :release => '5.11', :manage_devlog => false, },
     }
