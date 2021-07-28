@@ -202,8 +202,15 @@ class rsyslog (
           $default_mod_imjournal   = true
           $default_manage_devlog   = true
         }
+        /^8\.*/: {
+          $default_pid_file        = '/var/run/syslogd.pid'
+          $sysconfig_erb           = 'sysconfig.rhel8.erb'
+          $default_syslogd_options = undef
+          $default_mod_imjournal   = true
+          $default_manage_devlog   = true
+        }
         default: {
-          fail("rsyslog supports RedHat like systems with major release of 5, 6 and 7 and you have ${::operatingsystemrelease}")
+          fail("rsyslog supports RedHat like systems with major release of 5, 6, 7 and 8 and you have ${::operatingsystemrelease}")
         }
       }
       # ensures that sysklogd is absent, which is needed on EL5

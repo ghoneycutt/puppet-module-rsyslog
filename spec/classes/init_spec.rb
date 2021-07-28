@@ -805,6 +805,7 @@ describe 'rsyslog' do
         'redhat5'   => { :osfamily => 'RedHat',  :release => '5.10', :kernel => 'Linux',   },
         'redhat6'   => { :osfamily => 'RedHat',  :release => '6.5',  :kernel => 'Linux',   },
         'redhat7'   => { :osfamily => 'RedHat',  :release => '7.0.1406', :kernel => 'Linux',   },
+        'redhat8'   => { :osfamily => 'RedHat',  :release => '8.0',  :kernel => 'Linux',   },
         'debian7'   => { :osfamily => 'Debian',  :release => '7.3',  :kernel => 'Linux',   },
         'suse10'    => { :osfamily => 'Suse',    :release => '10.1',   :kernel => 'Linux',   },
         'suse11'    => { :osfamily => 'Suse',    :release => '11.1',   :kernel => 'Linux',   },
@@ -1073,6 +1074,36 @@ describe 'rsyslog' do
           }
           it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-m 0"$/) }
           it { should contain_file('rsyslog_sysconfig').with_content(/^KLOGD_OPTIONS="-x"$/) }
+        end
+
+        context 'with syslogd_options specified as valid value' do
+          let(:params) { { :syslogd_options => '-c0' } }
+
+          it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS="-c0"$/) }
+        end
+      end
+
+      context 'on EL 8' do
+        let :facts do
+          {
+            :kernel                 => 'Linux',
+            :osfamily               => 'RedHat',
+            :operatingsystemrelease => '8.0',
+          }
+        end
+
+        context 'with default params' do
+          it {
+            should contain_file('rsyslog_sysconfig').with({
+              'path'    => '/etc/sysconfig/rsyslog',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'mode'    => '0644',
+              'require' => 'Package[rsyslog]',
+              'notify'  => 'Service[rsyslog_daemon]',
+            })
+          }
+          it { should contain_file('rsyslog_sysconfig').with_content(/^SYSLOGD_OPTIONS=""$/) }
         end
 
         context 'with syslogd_options specified as valid value' do
@@ -1399,6 +1430,7 @@ describe 'rsyslog' do
       'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5.10',    :support => 'supported', },
       'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6.5',    :support => 'supported', },
       'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7.0.1406',    :support => 'supported', },
+      'redhat8'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '8.0',    :support => 'supported', },
       'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7.3',    :support => 'supported', },
       'suse9'     => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '9.1',    :support => 'unsupported', },
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10.2',   :support => 'supported', },
@@ -1448,6 +1480,7 @@ describe 'rsyslog' do
       'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :mod_imjournal => false, },
       'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :mod_imjournal => false, },
       'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :mod_imjournal => true, },
+      'redhat8'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '8',    :mod_imjournal => true, },
       'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :mod_imjournal => false, },
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :mod_imjournal => false, },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :mod_imjournal => false, },
@@ -1490,6 +1523,7 @@ describe 'rsyslog' do
       'redhat5'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '5',    :manage_devlog => false, },
       'redhat6'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '6',    :manage_devlog => false, },
       'redhat7'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '7',    :manage_devlog => true, },
+      'redhat8'   => { :kernel => 'Linux',   :osfamily => 'RedHat',  :release => '8',    :manage_devlog => true, },
       'debian7'   => { :kernel => 'Linux',   :osfamily => 'Debian',  :release => '7',    :manage_devlog => false, },
       'suse10'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '10',   :manage_devlog => false, },
       'suse11'    => { :kernel => 'Linux',   :osfamily => 'Suse',    :release => '11',   :manage_devlog => false, },
