@@ -203,7 +203,7 @@ class rsyslog (
           $default_manage_devlog   = true
         }
         /^8\.*/: {
-          $default_pid_file        = '/var/run/syslogd.pid'
+          $default_pid_file        = '/var/run/rsyslogd.pid'
           $sysconfig_erb           = 'sysconfig.rhel8.erb'
           $default_syslogd_options = undef
           $default_mod_imjournal   = true
