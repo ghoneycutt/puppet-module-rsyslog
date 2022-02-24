@@ -443,6 +443,7 @@ class rsyslog (
                                             '/var/log/cron',
                                           ]
         $default_logrotate_options      = [
+                                            'missingok',
                                             'sharedscripts',
                                             'postrotate',
                                             "    /bin/kill -HUP `cat ${pid_file_real} 2> /dev/null` 2> /dev/null || true",
